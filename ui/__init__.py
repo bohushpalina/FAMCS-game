@@ -1,6 +1,5 @@
-"""
-Пользовательский интерфейс для University Quest
-"""
+"""Пользовательский интерфейс для игры 'Увидимся в 6:05'"""
+
 
 from .main_window import MainWindow
 from .intro_screen import IntroScreen

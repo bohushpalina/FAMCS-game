@@ -19,9 +19,10 @@ class GameConfig:
     BUTTON_HOVER_COLOR = "#3a3a3a"
 
     # Шрифты
-    MAIN_FONT = "Arial"
+    MAIN_FONT = "Segoe UI"
+    TITLE_FONT = "Segoe Script"  # если хочешь разделить
     STORY_FONT_SIZE = 16
-    TITLE_FONT_SIZE = 24
+    TITLE_FONT_SIZE = 30
     BUTTON_FONT_SIZE = 14
 
     # Анимации

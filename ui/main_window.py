@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout,
                              QStackedWidget, QApplication)
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPalette, QColor
+from ui.splash_screen import SplashScreen  # импортируем новый экран
 
 from ui.intro_screen import IntroScreen
 from ui.game_screen import GameScreen
@@ -18,37 +19,35 @@ class MainWindow(QMainWindow):
         self.setup_styling()
 
     def init_ui(self):
-        """Инициализация интерфейса"""
-        self.setWindowTitle("University Quest")
-        self.setGeometry(100, 100, GameConfig.WINDOW_WIDTH, GameConfig.WINDOW_HEIGHT)
-        self.setMinimumSize(GameConfig.MIN_WINDOW_WIDTH, GameConfig.MIN_WINDOW_HEIGHT)
+            self.setWindowTitle("University Quest")
+            self.setGeometry(100, 100, GameConfig.WINDOW_WIDTH, GameConfig.WINDOW_HEIGHT)
+            self.setMinimumSize(GameConfig.MIN_WINDOW_WIDTH, GameConfig.MIN_WINDOW_HEIGHT)
+            central_widget = QWidget()
+            self.setCentralWidget(central_widget)
+            layout = QVBoxLayout()
+            layout.setContentsMargins(0, 0, 0, 0)
+            central_widget.setLayout(layout)
 
-        # Центральный виджет со стеком экранов
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+            self.stacked_widget = QStackedWidget()
+            layout.addWidget(self.stacked_widget)
 
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        central_widget.setLayout(layout)
+                # Создаем экраны
+            self.splash_screen = SplashScreen()
+            self.intro_screen = IntroScreen(self.game_manager)
+            self.game_screen = GameScreen(self.game_manager)
 
-        # Стек экранов
-        self.stacked_widget = QStackedWidget()
-        layout.addWidget(self.stacked_widget)
+                # Добавляем экраны в стек
+            self.stacked_widget.addWidget(self.splash_screen)
+            self.stacked_widget.addWidget(self.intro_screen)
+            self.stacked_widget.addWidget(self.game_screen)
+            # Подключаем сигналы
+            self.splash_screen.start_game.connect(lambda: self.stacked_widget.setCurrentWidget(self.intro_screen))
+            self.splash_screen.exit_game.connect(self.close)
+            self.intro_screen.start_game.connect(self.start_game)
+            self.game_screen.return_to_menu.connect(self.return_to_menu)
 
-        # Создание экранов
-        self.intro_screen = IntroScreen(self.game_manager)
-        self.game_screen = GameScreen(self.game_manager)
-
-        # Добавление экранов в стек
-        self.stacked_widget.addWidget(self.intro_screen)
-        self.stacked_widget.addWidget(self.game_screen)
-
-        # Подключение сигналов
-        self.intro_screen.start_game.connect(self.start_game)
-        self.game_screen.return_to_menu.connect(self.return_to_menu)
-
-        # Показываем intro screen
-        self.stacked_widget.setCurrentWidget(self.intro_screen)
+                # Показываем сначала заставку
+            self.stacked_widget.setCurrentWidget(self.splash_screen)
 
     def setup_styling(self):
         """Настройка стилей"""

@@ -20,6 +20,8 @@ class IntroScreen(QWidget):
         self.typewriter_timer.timeout.connect(self.typewriter_effect)
         self.init_ui()
         self.setup_styling()
+        self.intro_started = False
+
 
     def init_ui(self):
         """Инициализация интерфейса"""
@@ -28,25 +30,27 @@ class IntroScreen(QWidget):
         layout.setSpacing(20)
 
         # Заголовок
-        title = QLabel("UNIVERSITY QUEST")
+        title = QLabel("Пролог")
         title.setAlignment(Qt.AlignCenter)
         title.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.TITLE_FONT_SIZE + 10, QFont.Bold))
         layout.addWidget(title)
 
         # Добавляем растягивающийся элемент
-        layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        layout.addItem(QSpacerItem(20, 30, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # Текстовая область для истории
         self.story_text = QTextEdit()
         self.story_text.setReadOnly(True)
         self.story_text.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.STORY_FONT_SIZE))
-        self.story_text.setMaximumHeight(400)
+        self.story_text.setMinimumHeight(700)  # или даже больше, под размер окна
+        self.story_text.setMaximumHeight(16777215)  # снять ограничение
+
         self.story_text.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.story_text.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         layout.addWidget(self.story_text)
 
         # Добавляем растягивающийся элемент
-        layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        layout.addItem(QSpacerItem(20, 30, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # Кнопки
         buttons_layout = QHBoxLayout()
@@ -70,19 +74,18 @@ class IntroScreen(QWidget):
 
         self.setLayout(layout)
 
-        # Запускаем анимацию печати
-        QTimer.singleShot(1000, self.start_typewriter)
-
     def setup_styling(self):
         """Настройка стилей"""
         self.setStyleSheet(f"""
             QWidget {{
                 background-color: {GameConfig.BACKGROUND_COLOR};
-                color: {GameConfig.TEXT_COLOR};
+                color: white;
             }}
 
             QLabel {{
-                color: {GameConfig.ACCENT_COLOR};
+                color: white;
+                font-family: 'Segoe Script', cursive;
+                font-size: 38px;
                 font-weight: bold;
             }}
 
@@ -92,26 +95,32 @@ class IntroScreen(QWidget):
                 color: {GameConfig.TEXT_COLOR};
                 padding: 20px;
                 line-height: 1.6;
+                font-family: {GameConfig.MAIN_FONT};
+                font-family: 'Segoe Script', cursive;
+                font-size: 25px;
+
             }}
 
             QPushButton {{
-                background-color: {GameConfig.BUTTON_COLOR};
-                color: {GameConfig.TEXT_COLOR};
-                border: 2px solid {GameConfig.ACCENT_COLOR};
-                border-radius: 10px;
-                padding: 10px 20px;
-                font-weight: bold;
+                background-color: #444;
+                color: white;
+                border: none;
+                border-radius: 15px;
+                padding: 12px 24px;
+                font-size: 16px;
+                font-weight: 500;
+                font-family: 'Segoe UI', sans-serif;
             }}
 
             QPushButton:hover {{
-                background-color: {GameConfig.BUTTON_HOVER_COLOR};
-                border-color: {GameConfig.TEXT_COLOR};
+                background-color: #666;
             }}
 
             QPushButton:pressed {{
                 background-color: {GameConfig.ACCENT_COLOR};
             }}
         """)
+
 
     def start_typewriter(self):
         """Запуск эффекта печатной машинки"""
@@ -125,7 +134,9 @@ class IntroScreen(QWidget):
         if self.current_line >= len(StoryText.INTRO_TEXT):
             self.typewriter_timer.stop()
             self.start_button.setVisible(True)
+            self.skip_button.setVisible(False)  # 👈 скрываем кнопку "Пропустить"
             return
+
 
         current_text_line = StoryText.INTRO_TEXT[self.current_line]
 
@@ -137,7 +148,7 @@ class IntroScreen(QWidget):
             # Добавляем новую строку
             cursor = self.story_text.textCursor()
             cursor.movePosition(QTextCursor.End)
-            cursor.insertText("\\n")
+            cursor.insertText("\n")
             return
 
         # Добавляем следующий символ
@@ -154,16 +165,19 @@ class IntroScreen(QWidget):
     def skip_intro(self):
         """Пропустить интро"""
         self.typewriter_timer.stop()
-        full_text = "\\n".join(StoryText.INTRO_TEXT)
+        full_text = "\n".join(StoryText.INTRO_TEXT)
         self.story_text.setText(full_text)
         self.start_button.setVisible(True)
+        self.skip_button.setVisible(False)  # 👈 скрываем кнопку "Пропустить"
+
 
     def on_start_clicked(self):
         """Обработка нажатия кнопки старта"""
         self.start_game.emit()
 
     def showEvent(self, event):
-        """Событие показа виджета"""
         super().showEvent(event)
-        # Перезапускаем анимацию при показе
-        QTimer.singleShot(500, self.start_typewriter)
+        if not self.intro_started:
+            self.intro_started = True
+            QTimer.singleShot(500, self.start_typewriter)
+

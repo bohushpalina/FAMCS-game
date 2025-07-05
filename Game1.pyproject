@@ -1,0 +1,21 @@
+{
+    "files": [
+        "main.py",
+        "test_ui.py",
+        "data/__init__.py",
+        "data/story_text.py",
+        "game/__init__.py",
+        "game/game_manager.py",
+        "game/game_state.py",
+        "ui/__init__.py",
+        "ui/game_screen.py",
+        "ui/intro_screen.py",
+        "ui/main_window.py",
+        "ui/widgets/__init__.py",
+        "ui/widgets/choice_buttons.py",
+        "ui/widgets/text_display.py",
+        "utils/__init__.py",
+        "utils/config.py",
+        "ui/splash_screen.py"
+    ]
+}
