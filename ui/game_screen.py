@@ -35,12 +35,12 @@ class GameScreen(QWidget):
         top_layout = QHBoxLayout()
         top_layout.setContentsMargins(20, 15, 20, 15)
 
-        self.location_label = QLabel("University Quest")
+        self.location_label = QLabel("Увидимся в 6:05")
         self.location_label.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.TITLE_FONT_SIZE, QFont.Bold))
         self.location_label.setAlignment(Qt.AlignCenter)
         top_layout.addWidget(self.location_label, 1)
 
-        self.menu_button = QPushButton("☰ Меню")
+        self.menu_button = QPushButton("Меню")
         self.menu_button.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE))
         self.menu_button.setMaximumWidth(100)
         self.menu_button.clicked.connect(self.show_menu_dialog)
@@ -77,7 +77,7 @@ class GameScreen(QWidget):
         puzzle_layout = QVBoxLayout()
         puzzle_layout.setContentsMargins(20, 15, 20, 15)
 
-        self.puzzle_title = QLabel("🧩 Головоломка")
+        self.puzzle_title = QLabel("Головоломка")
         self.puzzle_title.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE + 2, QFont.Bold))
         self.puzzle_title.setAlignment(Qt.AlignCenter)
         puzzle_layout.addWidget(self.puzzle_title)
@@ -97,7 +97,7 @@ class GameScreen(QWidget):
         self.puzzle_input.returnPressed.connect(self.submit_puzzle_answer)
         input_layout.addWidget(self.puzzle_input)
 
-        self.submit_button = QPushButton("✓ Ответить")
+        self.submit_button = QPushButton("Ответить")
         self.submit_button.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE))
         self.submit_button.setMaximumWidth(120)
         self.submit_button.clicked.connect(self.submit_puzzle_answer)
@@ -272,7 +272,7 @@ class GameScreen(QWidget):
     # Меню игры
     def show_menu_dialog(self):
         msg = QMessageBox(self)
-        msg.setWindowTitle("📋 Меню игры")
+        msg.setWindowTitle("Меню игры")
         msg.setText("Что вы хотите сделать?")
         msg.setIcon(QMessageBox.Question)
 

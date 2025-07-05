@@ -56,23 +56,29 @@ class GameManager(QObject):
             self.start_final_scene()
 
     def make_choice(self, choice_index):
-        """Сделать выбор"""
+        """Обработка выбора игрока"""
         location = self.current_location
 
+            # Обработка выбора в холле
         if location == "entrance_hall":
-            if choice_index == 0:  # Библиотека
-                self.change_location("library")
-            else:
-                # Неправильный выбор
-                self.story_updated.emit(["Это не то место... Попробуй еще раз."])
+            if 0 <= choice_index < len(StoryText.ENTRANCE_HALL_CHOICES):
+                response = StoryText.ENTRANCE_HALL_CHOICE_RESPONSES.get(choice_index, "Это не то место... Попробуй ещё раз.")
+                if choice_index == 0:  # Библиотека
+                    self.story_updated.emit([response])
+                    self.change_location("library")
+                else:
+                    self.story_updated.emit([response])
 
         elif location == "library":
-            if choice_index == 5:  # Лексикология - правильный выбор
-                self.game_state.add_item("library_key")
-                self.story_updated.emit(StoryText.LIBRARY_BOOK_PAGE)
-                self.start_math_puzzle()
-            else:
-                self.story_updated.emit(["Эта книга не выделяется... Попробуй другую."])
+            if 0 <= choice_index < len(StoryText.LIBRARY_BOOKS):
+                response = StoryText.LIBRARY_BOOK_RESPONSES.get(choice_index, "Ничего особенного...")
+
+                if choice_index == 5:  # Лексикология — правильный выбор
+                    self.story_updated.emit([response] + StoryText.LIBRARY_BOOK_PAGE)
+                    self.game_state.add_item("library_key")
+                    self.start_math_puzzle()
+                else:
+                    self.story_updated.emit([response])
 
     def start_math_puzzle(self):
         """Запустить математическую головоломку"""
