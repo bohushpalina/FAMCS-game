@@ -17,6 +17,7 @@ class GameState(QObject):
         self.visited_locations = set()
         self.solved_puzzles = set()
         self.game_flags = {}
+        self.items = set()  # 👈 добавили
         self.start_time = datetime.now()
         self.stats = {
             'puzzles_solved': 0,
@@ -24,6 +25,15 @@ class GameState(QObject):
             'locations_visited': 0,
             'items_collected': 0
         }
+
+    def add_item(self, item_name):
+        if item_name not in self.items:
+            self.items.add(item_name)
+            self.stats['items_collected'] += 1
+            self.stats_changed.emit(self.stats)
+
+    def has_item(self, item_name):
+        return item_name in self.items
 
 
     def visit_location(self, location_name):

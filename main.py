@@ -14,7 +14,7 @@ def main():
     app = QApplication(sys.argv)
 
     # Настройка приложения
-    app.setApplicationName("University Quest")
+    app.setApplicationName("Увидимся в 6:05")
     app.setApplicationVersion("1.0")
 
     # Загрузка шрифтов
@@ -22,7 +22,11 @@ def main():
 
     # Создание главного окна
     main_window = MainWindow()
-    main_window.show()
+    main_window.setWindowTitle("Увидимся в 6:05")
+    main_window.showMaximized()
+
+
+
 
     # Запуск приложения
     sys.exit(app.exec_())

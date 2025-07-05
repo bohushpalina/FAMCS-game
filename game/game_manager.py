@@ -1,5 +1,7 @@
 from PyQt5.QtCore import QObject, pyqtSignal
 from game.game_state import GameState
+from data.story_text import StoryText
+
 
 class GameManager(QObject):
     """Основной менеджер игры"""
@@ -10,6 +12,7 @@ class GameManager(QObject):
     choices_updated = pyqtSignal(list)  # Обновление выборов
     puzzle_started = pyqtSignal(dict)   # Начало головоломки
     game_ended = pyqtSignal(bool)       # Окончание игры (True = победа)
+
 
     def __init__(self):
         super().__init__()

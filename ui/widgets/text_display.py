@@ -49,7 +49,7 @@ class TextDisplay(QTextEdit):
             self.typewriter_timer.start(GameConfig.TYPEWRITER_SPEED)
         else:
             self.clear()
-            self.setText("\\n".join(self.current_text_lines))
+            self.setText("\n".join(self.current_text_lines))
             self.text_finished.emit()
 
     def typewriter_tick(self):
@@ -85,7 +85,7 @@ class TextDisplay(QTextEdit):
 
         # Если это первый символ в строке, создаем новую строку
         if self.current_char_index == 0 and self.current_line_index > 0:
-            cursor.insertText("\\n")
+            cursor.insertText("\n")
             cursor.movePosition(QTextCursor.End)
 
         cursor.insertText(char)
@@ -99,7 +99,7 @@ class TextDisplay(QTextEdit):
         if self.typewriter_timer.isActive():
             self.typewriter_timer.stop()
             self.clear()
-            self.setText("\\n".join(self.current_text_lines))
+            self.setText("\n".join(self.current_text_lines))
             self.text_finished.emit()
 
     def append_text(self, text):

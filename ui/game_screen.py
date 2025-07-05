@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QTextEdit,
-                             QLabel, QPushButton, QLineEdit, QFrame, QScrollArea,
-                             QGridLayout, QSpacerItem, QSizePolicy, QMessageBox)
-from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QPropertyAnimation, QEasingCurve
-from PyQt5.QtGui import QFont, QTextCursor, QPalette
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, QFrame, QMessageBox
+)
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal
+from PyQt5.QtGui import QFont
 
 from utils.config import GameConfig
 from ui.widgets.text_display import TextDisplay
@@ -23,24 +23,23 @@ class GameScreen(QWidget):
 
     def init_ui(self):
         """Инициализация интерфейса"""
+
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(20, 20, 20, 20)
         main_layout.setSpacing(20)
 
-        # Верхняя панель с информацией
+        # Верхняя панель с названием локации и кнопкой меню
         top_panel = QFrame()
         top_panel.setFrameStyle(QFrame.StyledPanel)
         top_panel.setMaximumHeight(80)
         top_layout = QHBoxLayout()
         top_layout.setContentsMargins(20, 15, 20, 15)
 
-        # Заголовок текущей локации
         self.location_label = QLabel("University Quest")
         self.location_label.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.TITLE_FONT_SIZE, QFont.Bold))
         self.location_label.setAlignment(Qt.AlignCenter)
-        top_layout.addWidget(self.location_label)
+        top_layout.addWidget(self.location_label, 1)
 
-        # Кнопка меню
         self.menu_button = QPushButton("☰ Меню")
         self.menu_button.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE))
         self.menu_button.setMaximumWidth(100)
@@ -50,14 +49,14 @@ class GameScreen(QWidget):
         top_panel.setLayout(top_layout)
         main_layout.addWidget(top_panel)
 
-        # Основная область контента
+        # Основной контент: текст истории, выборы и головоломки
         content_frame = QFrame()
         content_frame.setFrameStyle(QFrame.StyledPanel)
         content_layout = QVBoxLayout()
         content_layout.setContentsMargins(20, 20, 20, 20)
         content_layout.setSpacing(20)
 
-        # Область для текста истории
+        # Текст истории
         self.text_display = TextDisplay()
         content_layout.addWidget(self.text_display, 3)
 
@@ -67,31 +66,28 @@ class GameScreen(QWidget):
         separator.setFrameShadow(QFrame.Sunken)
         content_layout.addWidget(separator)
 
-        # Область для выборов
+        # Выборы игрока
         self.choice_buttons = ChoiceButtons()
         self.choice_buttons.choice_made.connect(self.on_choice_made)
         content_layout.addWidget(self.choice_buttons, 1)
 
-        # Область для ввода ответов на головоломки
+        # Головоломка — поле ввода с вопросом и кнопка подтверждения
         self.puzzle_frame = QFrame()
         self.puzzle_frame.setFrameStyle(QFrame.StyledPanel)
         puzzle_layout = QVBoxLayout()
         puzzle_layout.setContentsMargins(20, 15, 20, 15)
 
-        # Заголовок головоломки
-        puzzle_title = QLabel("🧩 Головоломка")
-        puzzle_title.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE + 2, QFont.Bold))
-        puzzle_title.setAlignment(Qt.AlignCenter)
-        puzzle_layout.addWidget(puzzle_title)
+        self.puzzle_title = QLabel("🧩 Головоломка")
+        self.puzzle_title.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE + 2, QFont.Bold))
+        self.puzzle_title.setAlignment(Qt.AlignCenter)
+        puzzle_layout.addWidget(self.puzzle_title)
 
-        # Текст головоломки
         self.puzzle_label = QLabel()
         self.puzzle_label.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.STORY_FONT_SIZE))
         self.puzzle_label.setWordWrap(True)
         self.puzzle_label.setAlignment(Qt.AlignCenter)
         puzzle_layout.addWidget(self.puzzle_label)
 
-        # Поле ввода и кнопка
         input_layout = QHBoxLayout()
         input_layout.setSpacing(10)
 
@@ -109,7 +105,6 @@ class GameScreen(QWidget):
 
         puzzle_layout.addLayout(input_layout)
 
-        # Подсказка
         self.hint_label = QLabel()
         self.hint_label.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE - 2))
         self.hint_label.setWordWrap(True)
@@ -119,7 +114,6 @@ class GameScreen(QWidget):
 
         self.puzzle_frame.setLayout(puzzle_layout)
         self.puzzle_frame.setVisible(False)
-
         content_layout.addWidget(self.puzzle_frame)
 
         content_frame.setLayout(content_layout)
@@ -128,70 +122,61 @@ class GameScreen(QWidget):
         self.setLayout(main_layout)
 
     def setup_styling(self):
-        """Настройка стилей"""
+        """Применение стилей"""
         self.setStyleSheet(f"""
             QWidget {{
                 background-color: {GameConfig.BACKGROUND_COLOR};
-                color: {GameConfig.TEXT_COLOR};
-                font-family: {GameConfig.MAIN_FONT};
+                color: white;
+                font-family: 'Segoe Script', cursive;
             }}
-
             QFrame {{
                 background-color: {GameConfig.BUTTON_COLOR};
-                border: 2px solid {GameConfig.ACCENT_COLOR};
-                border-radius: 12px;
-            }}
-
-            QLabel {{
-                color: {GameConfig.TEXT_COLOR};
-                background-color: transparent;
+                border-radius: 15px;
                 border: none;
             }}
-
-            QPushButton {{
-                background-color: {GameConfig.BUTTON_COLOR};
-                color: {GameConfig.TEXT_COLOR};
-                border: 2px solid {GameConfig.ACCENT_COLOR};
-                border-radius: 8px;
-                padding: 10px 20px;
+            QLabel {{
+                color: white;
+                background-color: transparent;
+                font-family: 'Segoe Script', cursive;
                 font-weight: bold;
-                min-height: 20px;
             }}
-
+            QPushButton {{
+                background-color: #444;
+                color: white;
+                border: none;
+                border-radius: 15px;
+                padding: 12px 25px;
+                font-size: 16px;
+                font-family: 'Segoe UI', sans-serif;
+                font-weight: 600;
+                transition: background-color 0.3s ease;
+            }}
             QPushButton:hover {{
-                background-color: {GameConfig.BUTTON_HOVER_COLOR};
-                border-color: {GameConfig.TEXT_COLOR};
+                background-color: #666;
+                cursor: pointer;
             }}
-
             QPushButton:pressed {{
                 background-color: {GameConfig.ACCENT_COLOR};
                 color: {GameConfig.BACKGROUND_COLOR};
             }}
-
             QLineEdit {{
                 background-color: {GameConfig.BACKGROUND_COLOR};
-                color: {GameConfig.TEXT_COLOR};
-                border: 2px solid {GameConfig.ACCENT_COLOR};
-                border-radius: 6px;
-                padding: 10px;
-                font-size: 14px;
+                color: white;
+                border: 2px solid transparent;
+                border-radius: 10px;
+                padding: 10px 15px;
+                font-size: 16px;
+                font-family: 'Segoe UI', sans-serif;
+                transition: border-color 0.3s ease;
             }}
-
             QLineEdit:focus {{
-                border-color: {GameConfig.TEXT_COLOR};
+                border-color: {GameConfig.ACCENT_COLOR};
                 background-color: {GameConfig.BUTTON_COLOR};
-            }}
-
-            QFrame[frameShape="4"] {{
-                color: {GameConfig.ACCENT_COLOR};
-                background-color: {GameConfig.ACCENT_COLOR};
-                border: none;
-                max-height: 2px;
             }}
         """)
 
     def connect_signals(self):
-        """Подключение сигналов"""
+        """Подключаем сигналы от game_manager к методам экрана"""
         self.game_manager.location_changed.connect(self.on_location_changed)
         self.game_manager.story_updated.connect(self.on_story_updated)
         self.game_manager.choices_updated.connect(self.on_choices_updated)
@@ -199,81 +184,63 @@ class GameScreen(QWidget):
         self.game_manager.game_ended.connect(self.on_game_ended)
 
     def start_new_game(self):
-        """Начать новую игру"""
         self.game_manager.start_new_game()
 
+    # Обновление названия локации в заголовке
     def on_location_changed(self, location_name):
-        """Обработка изменения локации"""
         location_names = {
-            "entrance_hall": "🏛️ Холл первого этажа",
-            "library": "📚 Библиотека",
-            "room_521": "🚪 Аудитория 521",
-            "room_605": "🎓 Аудитория 605"
+            "entrance_hall": "Холл первого этажа",
+            "library": "Библиотека",
+            "room_521": "Аудитория 521",
+            "room_605": "Аудитория 605"
         }
+        self.location_label.setText(location_names.get(location_name, location_name))
 
-        display_name = location_names.get(location_name, f"📍 {location_name}")
-        self.location_label.setText(display_name)
-
+    # Обновление текста истории
     def on_story_updated(self, story_lines):
-        """Обновление текста истории"""
         self.text_display.show_text(story_lines)
 
+    # Обновление кнопок выбора
     def on_choices_updated(self, choices):
-        """Обновление выборов"""
         self.choice_buttons.set_choices(choices)
         self.puzzle_frame.setVisible(False)
+        self.choice_buttons.setVisible(True)  # Вместо show_choices()
 
+
+    # Начало головоломки: показываем вопрос и поле ввода
     def on_puzzle_started(self, puzzle_data):
-        """Начало головоломки"""
         self.current_puzzle = puzzle_data
-        self.puzzle_label.setText(puzzle_data["question"])
-
-        # Показываем подсказку если есть
-        if "hint" in puzzle_data:
-            self.hint_label.setText(f"💡 {puzzle_data['hint']}")
-        else:
-            self.hint_label.setText("")
-
+        self.puzzle_label.setText(puzzle_data.get("question", ""))
+        self.hint_label.setText(f"💡 {puzzle_data['hint']}" if "hint" in puzzle_data else "")
         self.puzzle_input.clear()
         self.puzzle_input.setFocus()
         self.puzzle_frame.setVisible(True)
         self.choice_buttons.hide_choices()
 
+    # Обработка выбора игрока (кнопка)
     def on_choice_made(self, choice_index):
-        """Обработка выбора"""
-        if choice_index == 0 and self.game_manager.current_location == "room_521":
-            # Переход в 605 аудиторию
-            self.game_manager.change_location("room_605")
-        elif choice_index == 0 and self.game_manager.current_location == "library":
-            # Переход в 521 аудиторию
-            self.game_manager.change_location("room_521")
-        else:
-            self.game_manager.make_choice(choice_index)
+        # Передаем выбор в менеджер игры
+        self.game_manager.make_choice(choice_index)
 
+    # Отправка ответа на головоломку
     def submit_puzzle_answer(self):
-        """Отправка ответа на головоломку"""
         if not self.current_puzzle:
             return
-
         answer = self.puzzle_input.text().strip()
         if not answer:
             self.show_message("Пожалуйста, введите ответ!")
             return
-
         if self.game_manager.solve_puzzle(answer):
             self.puzzle_frame.setVisible(False)
             self.current_puzzle = None
-            self.show_message("✅ Правильно!", success=True)
+            self.show_message("Правильно!", success=True)
         else:
             self.puzzle_input.clear()
             self.puzzle_input.setFocus()
-            self.show_message("❌ Неправильно. Попробуйте еще раз!")
+            self.show_message("Неправильно. Попробуйте еще раз!")
 
     def show_message(self, message, success=False):
-        """Показать временное сообщение"""
         color = "#4CAF50" if success else "#F44336"
-
-        # Создаем временную метку
         temp_label = QLabel(message)
         temp_label.setStyleSheet(f"""
             QLabel {{
@@ -286,15 +253,13 @@ class GameScreen(QWidget):
         """)
         temp_label.setAlignment(Qt.AlignCenter)
 
-
         layout = self.layout()
         layout.insertWidget(1, temp_label)
 
+        QTimer.singleShot(2000, temp_label.deleteLater)
 
-        QTimer.singleShot(2000, lambda: temp_label.deleteLater())
-
+    # Обработка окончания игры
     def on_game_ended(self, victory):
-        """Обработка окончания игры"""
         if victory:
             msg = QMessageBox(self)
             msg.setWindowTitle("🎉 Поздравляем!")
@@ -302,20 +267,18 @@ class GameScreen(QWidget):
             msg.setIcon(QMessageBox.Information)
             msg.setStandardButtons(QMessageBox.Ok)
             msg.exec_()
-
-        # Небольшая задержка перед возвратом в меню
         QTimer.singleShot(1000, self.return_to_menu.emit)
 
+    # Меню игры
     def show_menu_dialog(self):
-        """Показать диалог меню"""
         msg = QMessageBox(self)
         msg.setWindowTitle("📋 Меню игры")
         msg.setText("Что вы хотите сделать?")
         msg.setIcon(QMessageBox.Question)
 
-        menu_button = msg.addButton("🏠 Главное меню", QMessageBox.ActionRole)
-        restart_button = msg.addButton("🔄 Перезапустить", QMessageBox.ActionRole)
-        cancel_button = msg.addButton("❌ Отмена", QMessageBox.RejectRole)
+        menu_button = msg.addButton("Главное меню", QMessageBox.ActionRole)
+        restart_button = msg.addButton("Перезапустить", QMessageBox.ActionRole)
+        cancel_button = msg.addButton("Отмена", QMessageBox.RejectRole)
 
         msg.exec_()
 
@@ -325,8 +288,7 @@ class GameScreen(QWidget):
             self.start_new_game()
 
     def keyPressEvent(self, event):
-        """Обработка нажатий клавиш"""
-        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
             if self.puzzle_frame.isVisible():
                 self.submit_puzzle_answer()
         elif event.key() == Qt.Key_Escape:
