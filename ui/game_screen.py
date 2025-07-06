@@ -20,6 +20,7 @@ class GameScreen(QWidget):
         self.init_ui()
         self.setup_styling()
         self.connect_signals()
+        self.processing_answer = False
 
     def init_ui(self):
         """Инициализация интерфейса"""
@@ -90,7 +91,6 @@ class GameScreen(QWidget):
         self.puzzle_input = QLineEdit()
         self.puzzle_input.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE))
         self.puzzle_input.setPlaceholderText("Введите ответ...")
-        self.puzzle_input.returnPressed.connect(self.submit_puzzle_answer)
         input_layout.addWidget(self.puzzle_input)
 
         self.submit_button = QPushButton("Ответить")
@@ -227,8 +227,16 @@ class GameScreen(QWidget):
 
     # Отправка ответа на головоломку
     def submit_puzzle_answer(self):
-        if not self.current_puzzle:
+        print("submit_puzzle_answer called")
+
+        if self.processing_answer:
             return
+        self.processing_answer = True
+
+        if not self.current_puzzle:
+            self.processing_answer = False
+            return
+
         answer = self.puzzle_input.text().strip()
         if self.game_manager.solve_puzzle(answer):
             self.puzzle_frame.setVisible(False)
@@ -238,6 +246,8 @@ class GameScreen(QWidget):
             self.puzzle_input.clear()
             self.puzzle_input.setFocus()
             self.show_message("Неправильно. Попробуйте еще раз!")
+
+        self.processing_answer = False
 
     def show_message(self, message, success=False):
         color = "#4CAF50" if success else "#F44336"

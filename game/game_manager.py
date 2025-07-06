@@ -88,6 +88,28 @@ class GameManager(QObject):
                     self.story_updated.emit([response])
                     self.choices_updated.emit(StoryText.LIBRARY_BOOKS)
 
+        elif location == "library_after_puzzle":
+            if 0 <= choice_index < len(StoryText.AFTER_LIBRARY_CHOICES):
+                choice = StoryText.AFTER_LIBRARY_CHOICES[choice_index]
+                if choice == "Аудитория 521":
+                    self.story_updated.emit([StoryText.AFTER_LIBRARY_RESPONSES[choice]])
+                    self.change_location("room_521")
+                    self.story_updated.emit(StoryText.ROOM_521_DESCRIPTION)
+                    self.start_pi_puzzle()
+                    self.choices_updated.emit([])
+                else:
+                    # Показываем реакцию на неправильный выбор
+                    self.story_updated.emit([StoryText.AFTER_LIBRARY_RESPONSES[choice]])
+
+                    # Через 7 секунд возвращаем выбор и исходный текст
+                    def reset_after_library():
+                        # Вернуть вопрос "Куда отправиться?" + выборы
+                        self.story_updated.emit((StoryText.LIBRARY_KEY_FOUND, True))
+                        self.choices_updated.emit(StoryText.AFTER_LIBRARY_CHOICES)
+
+                    QTimer.singleShot(8000, reset_after_library)
+
+
     def start_math_puzzle(self):
         """Запустить математическую головоломку"""
         puzzle_data = {
@@ -113,17 +135,14 @@ class GameManager(QObject):
         if location == "library":
             if answer == "521":
                 self.game_state.add_item("room_521_key")
-                self.story_updated.emit(
-                    StoryText.LIBRARY_KEY_FOUND + ["Куда отправиться?"]
-                )
+                # Выводим предупреждение и сообщение о ключе
+                self.story_updated.emit(StoryText.LIBRARY_MATH_WARNING + StoryText.LIBRARY_KEY_FOUND + ["Куда отправиться?"])
+                # Показываем варианты выбора аудиторий
                 self.choices_updated.emit(StoryText.AFTER_LIBRARY_CHOICES)
+                # Меняем локацию, чтобы обработка выбора после библиотеки была корректной
+                self.current_location = "library_after_puzzle"
                 return True
-            else:
-                    # При неправильном ответе показываем предупреждение и не выводим лишний текст
-                    self.story_updated.emit(LIBRARY_MATH_WARNING)
-                    # Можно при желании сбросить выборы или оставить пустыми, чтобы не путать игрока
-                    self.choices_updated.emit([])
-                    return False
+
 
         elif location == "room_521":
             if answer == "9":
