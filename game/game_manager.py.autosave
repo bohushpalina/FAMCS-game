@@ -118,12 +118,7 @@ class GameManager(QObject):
                 )
                 self.choices_updated.emit(StoryText.AFTER_LIBRARY_CHOICES)
                 return True
-            else:
-                    # При неправильном ответе показываем предупреждение и не выводим лишний текст
-                    self.story_updated.emit(LIBRARY_MATH_WARNING)
-                    # Можно при желании сбросить выборы или оставить пустыми, чтобы не путать игрока
-                    self.choices_updated.emit([])
-                    return False
+            
 
         elif location == "room_521":
             if answer == "9":

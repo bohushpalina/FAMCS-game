@@ -77,10 +77,6 @@ class GameScreen(QWidget):
         puzzle_layout = QVBoxLayout()
         puzzle_layout.setContentsMargins(20, 15, 20, 15)
 
-        self.puzzle_title = QLabel("Головоломка")
-        self.puzzle_title.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE + 2, QFont.Bold))
-        self.puzzle_title.setAlignment(Qt.AlignCenter)
-        puzzle_layout.addWidget(self.puzzle_title)
 
         self.puzzle_label = QLabel()
         self.puzzle_label.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.STORY_FONT_SIZE))
@@ -197,8 +193,16 @@ class GameScreen(QWidget):
         self.location_label.setText(location_names.get(location_name, location_name))
 
     # Обновление текста истории
-    def on_story_updated(self, story_lines):
-        self.text_display.show_text(story_lines)
+    def on_story_updated(self, story_data):
+        # Позволяет передавать флаг "без анимации"
+        if isinstance(story_data, tuple):
+            story_lines, instant = story_data
+        else:
+            story_lines = story_data
+            instant = False
+
+        self.text_display.show_text(story_lines, use_typewriter=not instant)
+
 
     # Обновление кнопок выбора
     def on_choices_updated(self, choices):
@@ -211,7 +215,6 @@ class GameScreen(QWidget):
     def on_puzzle_started(self, puzzle_data):
         self.current_puzzle = puzzle_data
         self.puzzle_label.setText(puzzle_data.get("question", ""))
-        self.hint_label.setText(f"💡 {puzzle_data['hint']}" if "hint" in puzzle_data else "")
         self.puzzle_input.clear()
         self.puzzle_input.setFocus()
         self.puzzle_frame.setVisible(True)
@@ -227,9 +230,6 @@ class GameScreen(QWidget):
         if not self.current_puzzle:
             return
         answer = self.puzzle_input.text().strip()
-        if not answer:
-            self.show_message("Пожалуйста, введите ответ!")
-            return
         if self.game_manager.solve_puzzle(answer):
             self.puzzle_frame.setVisible(False)
             self.current_puzzle = None

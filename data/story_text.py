@@ -69,16 +69,20 @@ class StoryText:
     }
 
     LIBRARY_BOOK_PAGE = [
-        "",
-        "Красным цветом написано:",
-        "\"The number is the answer. The sum is the door.\"",
+        'Красным цветом написано:\n"The number is the answer. The sum is the door."',
         "Solve: (10 + 1) × (5 + 2) + 444 = ?",
-        "",
-        "\"But something is wrong there. Distortion of space and numbers.",
-        "Time loops. Don't trust what you see.\"",
-        "",
-        "Что-то металлическое выпадает из книги — ключ с номером 521."
     ]
+
+    LIBRARY_MATH_WARNING = [
+        '"But something is wrong there. Distortion of space and numbers.',
+        'Time loops. Don’t trust what you see."'
+    ]
+
+    LIBRARY_KEY_FOUND = [
+        "Из потрёпанной книги выпадает холодный металл — это ключ, на нём едва различим лишь один знак: 5..."
+    ]
+
+
 
     # Выбор следующей локации после библиотеки
     AFTER_LIBRARY_CHOICES = [
