@@ -14,19 +14,18 @@ class TextDisplay(QTextEdit):
         self.current_text_lines = []
         self.current_line_index = 0
         self.current_char_index = 0
+        self.line_buffer = ""
         self.typewriter_timer = QTimer()
         self.typewriter_timer.timeout.connect(self.typewriter_tick)
         self.setup_widget()
 
     def setup_widget(self):
-        """Настройка виджета"""
         self.setReadOnly(True)
         self.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.STORY_FONT_SIZE))
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setWordWrapMode(1)  # QTextOption.WordWrap
 
-        # Стили
         self.setStyleSheet(f"""
             QTextEdit {{
                 background-color: transparent;
@@ -39,18 +38,16 @@ class TextDisplay(QTextEdit):
         """)
 
     def show_text(self, text_lines, use_typewriter=True):
-        """Показать текст с эффектом печатной машинки"""
+        self.clear()
         self.current_text_lines = text_lines if isinstance(text_lines, list) else [text_lines]
+        self.current_line_index = 0
+        self.current_char_index = 0
+        self.line_buffer = ""
 
         if use_typewriter:
-            self.clear()
-            self.current_line_index = 0
-            self.current_char_index = 0
             self.typewriter_timer.start(GameConfig.TYPEWRITER_SPEED)
         else:
-            self.clear()
-            self.setText("\n".join(self.current_text_lines))
-            self.text_finished.emit()
+            self.insert_all_text()
 
     def typewriter_tick(self):
         """Один тик эффекта печатной машинки"""
@@ -66,7 +63,7 @@ class TextDisplay(QTextEdit):
             self.append("")
             self.current_line_index += 1
             self.current_char_index = 0
-            return
+            return  # Важно: выходим, чтобы не вставлять символ дальше
 
         # Если дошли до конца строки
         if self.current_char_index >= len(current_line):
@@ -76,7 +73,7 @@ class TextDisplay(QTextEdit):
             # Добавляем новую строку только если это не последняя строка
             if self.current_line_index < len(self.current_text_lines):
                 self.append("")
-            return
+            return  # Важно: выходим, чтобы не вставлять символ дальше
 
         # Добавляем следующий символ
         char = current_line[self.current_char_index]
@@ -94,24 +91,39 @@ class TextDisplay(QTextEdit):
         # Прокручиваем к концу
         self.ensureCursorVisible()
 
+    def _update_last_line(self, text):
+        cursor = self.textCursor()
+        cursor.movePosition(cursor.End)
+        cursor.select(cursor.BlockUnderCursor)
+        cursor.removeSelectedText()
+        cursor.insertText(text)
+        self.ensureCursorVisible()
+
     def skip_typewriter(self):
-        """Пропустить эффект печатной машинки"""
         if self.typewriter_timer.isActive():
             self.typewriter_timer.stop()
-            self.clear()
-            self.setText("\n".join(self.current_text_lines))
+            self.insert_all_text()
             self.text_finished.emit()
 
     def append_text(self, text):
-        """Добавить текст в конец"""
-        cursor = self.textCursor()
-        cursor.movePosition(QTextCursor.End)
-        cursor.insertText("\\n\\n" + text)
+        self.append("")
+        self.append(text)
         self.ensureCursorVisible()
 
+
+
     def mousePressEvent(self, event):
-        """Обработка клика мыши - пропуск анимации"""
         if event.button() == Qt.LeftButton and self.typewriter_timer.isActive():
             self.skip_typewriter()
         else:
             super().mousePressEvent(event)
+
+    def insert_all_text(self):
+        self.clear()
+        cursor = self.textCursor()
+        for i, line in enumerate(self.current_text_lines):
+            if i > 0:
+                cursor.insertBlock()  # создаёт новый блок, но без лишнего форматирования
+            cursor.insertText(line)
+        self.setTextCursor(cursor)
+

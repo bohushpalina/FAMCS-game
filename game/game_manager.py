@@ -2,6 +2,8 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from game.game_state import GameState
 from data.story_text import StoryText
 from PyQt5.QtCore import QTimer
+from utils.config import GameConfig
+
 
 class GameManager(QObject):
     """Основной менеджер игры"""
@@ -18,6 +20,9 @@ class GameManager(QObject):
         super().__init__()
         self.game_state = GameState()
         self.current_location = None
+        self.room_605_click_count = 0
+        self.room_605_new_action_shown = False
+        self.room_605_wake_up_ready = False
 
     def start_new_game(self):
         """Начать новую игру"""
@@ -52,8 +57,25 @@ class GameManager(QObject):
 
         elif location_name == "room_605":
             self.story_updated.emit(StoryText.ROOM_605_DESCRIPTION)
-            # Запускаем финальную сцену
-            self.start_final_scene()
+            self.choices_updated.emit(StoryText.ROOM_605_ACTIONS)
+
+    def _reset_room_605(self):
+        """Сброс описания и обновление кнопок"""
+        # Если игрок уже готов проснуться — НЕ сбрасываем старые действия
+        if self.room_605_wake_up_ready:
+            self.story_updated.emit((StoryText.ROOM_605_DESCRIPTION, True))
+            self.choices_updated.emit([StoryText.ROOM_605_WAKE_UP])
+            return
+
+        # Стандартный сброс
+        self.story_updated.emit((StoryText.ROOM_605_DESCRIPTION, True))
+        actions = StoryText.ROOM_605_ACTIONS.copy()
+        if self.room_605_new_action_shown:
+            actions.append(StoryText.ROOM_605_NEW_ACTION)
+        self.choices_updated.emit(actions)
+
+
+
 
     def make_choice(self, choice_index):
         """Обработка выбора игрока"""
@@ -108,6 +130,67 @@ class GameManager(QObject):
 
                     QTimer.singleShot(8000, reset_after_library)
 
+        elif location == "room_521":
+            if 0 <= choice_index < len(StoryText.ROOM_521_CHOICES):
+                choice = StoryText.ROOM_521_CHOICES[choice_index]
+                response = StoryText.ROOM_521_CHOICES_RESPONSES.get(choice, "Это не тот путь. Стоит попробовать ещё раз.")
+                self.story_updated.emit([response])
+                if choice == "Аудитория 605":
+                    self.change_location("room_605")
+                else:
+
+                    def reset_room_521():
+                        self.story_updated.emit((StoryText.ROOM_521_CLUE, True))
+                        self.choices_updated.emit(StoryText.ROOM_521_CHOICES)
+
+                    QTimer.singleShot(7000, reset_room_521)
+
+        elif location == "room_605":
+            current_actions = StoryText.ROOM_605_ACTIONS
+            if self.room_605_wake_up_ready:
+                current_actions = [StoryText.ROOM_605_WAKE_UP]
+            if self.room_605_new_action_shown:
+                current_actions = StoryText.ROOM_605_ACTIONS + [StoryText.ROOM_605_NEW_ACTION]
+
+            if 0 <= choice_index < len(current_actions):
+                    choice = current_actions[choice_index]
+
+            if not self.room_605_new_action_shown and choice in StoryText.ROOM_605_ACTIONS:
+                self.room_605_click_count += 1
+                if self.room_605_click_count >= 2:
+                    self.room_605_new_action_shown = True
+
+
+            if choice == "Осмотреть комнату":
+                self.story_updated.emit([StoryText.ROOM_605_MESSAGES_INSPECT])
+                if not self.room_605_wake_up_ready:
+                    QTimer.singleShot(6000, self._reset_room_605)
+            elif choice == "Выйти из аудитории":
+                self.story_updated.emit([StoryText.ROOM_605_MESSAGES_EXIT])
+                if not self.room_605_wake_up_ready:
+                    QTimer.singleShot(6000, self._reset_room_605)
+            elif choice == StoryText.ROOM_605_NEW_ACTION:
+                self.story_updated.emit(StoryText.ROOM_605_WINDOW_DESCRIPTION)
+
+                def enable_wake_up():
+                    self.room_605_wake_up_ready = True
+                    self.choices_updated.emit([StoryText.ROOM_605_WAKE_UP])
+
+                QTimer.singleShot(len(StoryText.ROOM_605_WINDOW_DESCRIPTION) * GameConfig.TYPEWRITER_SPEED * 30 + 6000, enable_wake_up)
+
+            elif "Проснуться" in choice:
+                self.story_updated.emit(StoryText.ROOM_605_WAKE_UP_TEXT)
+
+                def show_credits():
+                    self.story_updated.emit(StoryText.CREDITS)
+                    self.choices_updated.emit([])  # Убираем все кнопки
+                    self.game_ended.emit(True)
+
+                QTimer.singleShot(len(StoryText.ROOM_605_WAKE_UP_TEXT) * GameConfig.TYPEWRITER_SPEED * 30 + 2000, show_credits)
+
+
+
+
 
     def start_math_puzzle(self):
         """Запустить математическую головоломку"""
@@ -146,7 +229,7 @@ class GameManager(QObject):
         elif location == "room_521":
             if answer == "9":
                 self.story_updated.emit(StoryText.ROOM_521_CLUE)
-                self.choices_updated.emit(["Идти в аудиторию 605"])
+                self.choices_updated.emit(StoryText.ROOM_521_CHOICES)  # Показать выборы
                 return True
 
 

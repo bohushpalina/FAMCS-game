@@ -188,7 +188,8 @@ class GameScreen(QWidget):
             "entrance_hall": "Холл первого этажа",
             "library": "Библиотека",
             "room_521": "Аудитория 521",
-            "room_605": "Аудитория 605"
+            "room_605": "Аудитория 605",
+            "---": "— — —"  # Заголовок при взгляде в окно
         }
         self.location_label.setText(location_names.get(location_name, location_name))
 
@@ -213,7 +214,6 @@ class GameScreen(QWidget):
 
     # Начало головоломки: показываем вопрос и поле ввода
     def on_puzzle_started(self, puzzle_data):
-        print("Puzzle frame visible before:", self.puzzle_frame.isVisible())
         self.current_puzzle = puzzle_data
         self.puzzle_label.setText(puzzle_data.get("question", ""))
         self.puzzle_input.clear()
@@ -221,7 +221,6 @@ class GameScreen(QWidget):
         self.puzzle_frame.setVisible(True)
         self.choice_buttons.hide_choices()
         self.puzzle_frame.setVisible(True)
-        print("Puzzle frame visible after:", self.puzzle_frame.isVisible())
 
 
         if puzzle_data.get("type") == "sequence":
@@ -236,7 +235,6 @@ class GameScreen(QWidget):
 
     # Отправка ответа на головоломку
     def submit_puzzle_answer(self):
-        print("submit_puzzle_answer called")
 
         if self.processing_answer:
             return

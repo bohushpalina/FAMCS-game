@@ -47,6 +47,7 @@ class StoryText:
     # Библиотека
     LIBRARY_DESCRIPTION = [
         "Ты попал в библиотеку. Полки уходят в темноту.",
+        "",
         "Среди книг одна привлекает твое внимание...",
     ]
 
@@ -69,13 +70,14 @@ class StoryText:
     }
 
     LIBRARY_BOOK_PAGE = [
-        'Красным цветом написано:\n"The number is the answer. The sum is the door."',
+        'Красным цветом написано:',
+        "The number is the answer. The sum is the door.",
         "Solve: (10 + 1) × (5 + 2) + 444 = ?",
     ]
 
     LIBRARY_MATH_WARNING = [
-        '"But something is wrong there. Distortion of space and numbers.',
-        'Time loops. Don’t trust what you see."'
+        '"But something is wrong there. Distortion of space and numbers."',
+        '"Time loops. Don’t trust what you see."'
     ]
 
     LIBRARY_KEY_FOUND = [
@@ -115,8 +117,6 @@ class StoryText:
     ROOM_521_WRONG_ANSWER = "Неверно. Попробуй ещё раз."
 
     ROOM_521_CLUE = [
-        "Правильно!",
-        "",
         "Табличка появляется на доске:",
         "Иди туда, где парты хранят историю поколений ФПМовцев,",
         "где стены старше тебя, а окна смотрят на Красный костёл.",
@@ -173,12 +173,6 @@ class StoryText:
         "На часах — 6:05."
     ]
 
-    # Финал
-    FINAL_TEXT = [
-        "Но что-то изменилось...",
-        "Или это тебе только снится?"
-    ]
-
     # Системные сообщения
     GAME_OVER = "Игра окончена"
     CONTINUE = "Продолжить"
@@ -189,5 +183,5 @@ class StoryText:
     # Титры (можно дополнить или убрать)
     CREDITS = [
         "Спасибо за игру!",
-        "Разработка: Богуш, яЯрмолик и GPT"
+        "Разработка: Богуш, Ярмолик и GPT)"
     ]
