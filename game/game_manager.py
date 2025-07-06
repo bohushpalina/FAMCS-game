@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QObject, pyqtSignal
 from game.game_state import GameState
 from data.story_text import StoryText
-
+from PyQt5.QtCore import QTimer
 
 class GameManager(QObject):
     """Основной менеджер игры"""
@@ -68,6 +68,13 @@ class GameManager(QObject):
                     self.change_location("library")
                 else:
                     self.story_updated.emit([response])
+                    # Через 3 секунды возвращаем начальный текст и выборы
+
+                    def reset_entrance_hall():
+                        self.story_updated.emit(StoryText.ENTRANCE_HALL_DESCRIPTION)
+                        self.choices_updated.emit(StoryText.ENTRANCE_HALL_CHOICES)
+
+                    QTimer.singleShot(7000, reset_entrance_hall)
 
         elif location == "library":
             if 0 <= choice_index < len(StoryText.LIBRARY_BOOKS):
@@ -79,6 +86,7 @@ class GameManager(QObject):
                     self.start_math_puzzle()
                 else:
                     self.story_updated.emit([response])
+                    self.choices_updated.emit(StoryText.LIBRARY_BOOKS)
 
     def start_math_puzzle(self):
         """Запустить математическую головоломку"""
