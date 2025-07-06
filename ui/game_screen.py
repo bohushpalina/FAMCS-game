@@ -213,12 +213,21 @@ class GameScreen(QWidget):
 
     # Начало головоломки: показываем вопрос и поле ввода
     def on_puzzle_started(self, puzzle_data):
+        print("Puzzle frame visible before:", self.puzzle_frame.isVisible())
         self.current_puzzle = puzzle_data
         self.puzzle_label.setText(puzzle_data.get("question", ""))
         self.puzzle_input.clear()
         self.puzzle_input.setFocus()
         self.puzzle_frame.setVisible(True)
         self.choice_buttons.hide_choices()
+        self.puzzle_frame.setVisible(True)
+        print("Puzzle frame visible after:", self.puzzle_frame.isVisible())
+
+
+        if puzzle_data.get("type") == "sequence":
+            self.puzzle_input.setPlaceholderText("Введите следующий элемент последовательности...")
+        else:
+            self.puzzle_input.setPlaceholderText("Введите ответ...")
 
     # Обработка выбора игрока (кнопка)
     def on_choice_made(self, choice_index):

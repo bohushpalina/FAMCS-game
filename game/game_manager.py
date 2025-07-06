@@ -96,7 +96,6 @@ class GameManager(QObject):
                     self.change_location("room_521")
                     self.story_updated.emit(StoryText.ROOM_521_DESCRIPTION)
                     self.start_pi_puzzle()
-                    self.choices_updated.emit([])
                 else:
                     # Показываем реакцию на неправильный выбор
                     self.story_updated.emit([StoryText.AFTER_LIBRARY_RESPONSES[choice]])
