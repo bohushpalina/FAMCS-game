@@ -1,4 +1,2 @@
 # FAMCS-game
-Фигня ваш famcs game 
-аоаоааооа помогите
-меня заперли в 605
+I just wanna have 0 bugs ☠️☠️
