@@ -44,7 +44,9 @@ class MainWindow(QMainWindow):
             self.splash_screen.start_game.connect(lambda: self.stacked_widget.setCurrentWidget(self.intro_screen))
             self.splash_screen.exit_game.connect(self.close)
             self.intro_screen.start_game.connect(self.start_game)
-            self.game_screen.return_to_menu.connect(self.return_to_menu)
+            self.game_screen.return_to_menu.connect(self.return_to_menu)       # Перезапуск — на интро
+            self.game_screen.return_to_splash.connect(self.go_to_splash)       # Главное меню — на заставку
+
 
                 # Показываем сначала заставку
             self.stacked_widget.setCurrentWidget(self.splash_screen)
@@ -62,6 +64,10 @@ class MainWindow(QMainWindow):
         """Начать игру"""
         self.stacked_widget.setCurrentWidget(self.game_screen)
         self.game_screen.start_new_game()
+
+    def go_to_splash(self):
+        self.stacked_widget.setCurrentWidget(self.splash_screen)
+
 
     def return_to_menu(self):
         """Вернуться в меню"""

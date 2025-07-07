@@ -12,6 +12,7 @@ class GameScreen(QWidget):
     """Основной игровой экран"""
 
     return_to_menu = pyqtSignal()
+    return_to_splash = pyqtSignal()
 
     def __init__(self, game_manager):
         super().__init__()
@@ -312,7 +313,7 @@ class GameScreen(QWidget):
         msg.exec_()
 
         if msg.clickedButton() == menu_button:
-            self.return_to_menu.emit()
+            self.return_to_splash.emit()        # новый сигнал — на заставку
         elif msg.clickedButton() == restart_button:
             self.return_to_menu.emit()
 
