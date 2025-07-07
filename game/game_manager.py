@@ -206,6 +206,7 @@ class GameManager(QObject):
                 def show_final_button():
                     self.choices_updated.emit([StoryText.ROOM_605_FINAL_ACTION])
                     self.room_605_final_action_shown = True
+                    self.location_changed.emit("На часах — 6:05")  # <- Просто красивый заголовок
 
 
                 QTimer.singleShot(
@@ -215,14 +216,10 @@ class GameManager(QObject):
 
             elif choice == StoryText.ROOM_605_FINAL_ACTION:
                 self.choices_updated.emit([])
-
-                def show_credits():
-                    print("Игра завершена — показываем титры")  # debug
-                    self.story_updated.emit(StoryText.CREDITS)  # Просто показываем текст титров
-                    self.game_over = True
-                    self.game_ended.emit(True)
-
-                QTimer.singleShot(1500, show_credits)
+                print("Игра завершена — показываем титры")
+                self.story_updated.emit(StoryText.CREDITS)
+                self.game_over = True
+                self.game_ended.emit(True)
 
 
 
