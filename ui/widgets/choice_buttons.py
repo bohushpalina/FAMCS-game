@@ -75,8 +75,15 @@ class ChoiceButtons(QWidget):
         self.show()
 
         # Создаем новые кнопки
+        self.is_numbered = True  # По умолчанию
+
+        if isinstance(choices, dict):
+            self.is_numbered = choices.get("numbered", True)
+            choices = choices.get("items", [])
+
         for i, choice in enumerate(choices):
-            button = QPushButton(f"{i+1}. {choice}")
+            label = f"{i+1}. {choice}" if self.is_numbered else choice
+            button = QPushButton(label)
             button.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE))
             button.clicked.connect(lambda checked, idx=i: self.on_button_clicked(idx))
 
