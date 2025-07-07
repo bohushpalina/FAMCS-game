@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QPushButton,
                              QTextEdit, QHBoxLayout, QSpacerItem, QSizePolicy)
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal, QPropertyAnimation, QEasingCurve
-from PyQt5.QtGui import QFont, QTextCursor, QPalette
+from PyQt5.QtGui import QFont, QTextCursor, QPalette, QTextCharFormat
 
 from utils.config import GameConfig
 from data.story_text import StoryText
@@ -93,8 +93,8 @@ class IntroScreen(QWidget):
                 background-color: transparent;
                 border: none;
                 color: {GameConfig.TEXT_COLOR};
-                padding: 20px;
-                line-height: 1.6;
+                padding: 20px 40px;
+                line-height: 1.3;
                 font-family: {GameConfig.MAIN_FONT};
                 font-family: 'Segoe Script', cursive;
                 font-size: 25px;
@@ -134,41 +134,90 @@ class IntroScreen(QWidget):
         if self.current_line >= len(StoryText.INTRO_TEXT):
             self.typewriter_timer.stop()
             self.start_button.setVisible(True)
-            self.skip_button.setVisible(False)  # 👈 скрываем кнопку "Пропустить"
+            self.skip_button.setVisible(False)
             return
-
 
         current_text_line = StoryText.INTRO_TEXT[self.current_line]
 
         if self.current_char >= len(current_text_line):
-            # Переходим к следующей строке
-            self.current_line += 1
-            self.current_char = 0
-
-            # Добавляем новую строку
             cursor = self.story_text.textCursor()
             cursor.movePosition(QTextCursor.End)
             cursor.insertText("\n")
+            self.current_char = 0
+            self.current_line += 1
             return
 
-        # Добавляем следующий символ
-        char = current_text_line[self.current_char]
         cursor = self.story_text.textCursor()
         cursor.movePosition(QTextCursor.End)
+
+        if self.current_char == 0:
+            if self.current_line > 0:
+                cursor.insertText("\n")
+
+            # Центрирование
+            block_format = cursor.blockFormat()
+            block_format.setAlignment(Qt.AlignCenter)
+            cursor.setBlockFormat(block_format)
+
+        # Применяем форматирование для каждого символа
+        char_format = QTextCharFormat()
+        if self._is_quote(current_text_line):
+            char_format.setFontItalic(True)
+        else:
+            char_format.setFontItalic(False)
+            char_format.setForeground(Qt.white)
+        cursor.setCharFormat(char_format)
+
+        # Вставляем символ
+        char = current_text_line[self.current_char]
         cursor.insertText(char)
+        self.story_text.ensureCursorVisible()
 
         self.current_char += 1
+        if self.current_char >= len(current_text_line):
+            self.current_char = 0
+            self.current_line += 1
 
-        # Прокручиваем вниз
-        self.story_text.ensureCursorVisible()
+    def _is_quote(self, line):
+        """Определяет, является ли строка цитатой"""
+        line = line.strip()
+        return (
+            (line.startswith("'") and line.endswith("'")) or
+            (line.startswith('"') and line.endswith('"')) or
+            (line.startswith("«") and line.endswith("»")) or
+            ("Увидимся в 6:05" in line)
+        )
+
 
     def skip_intro(self):
         """Пропустить интро"""
         self.typewriter_timer.stop()
-        full_text = "\n".join(StoryText.INTRO_TEXT)
-        self.story_text.setText(full_text)
+        self.story_text.clear()
+
+        cursor = self.story_text.textCursor()
+        for i, line in enumerate(StoryText.INTRO_TEXT):
+            if i > 0:
+                cursor.movePosition(QTextCursor.End)
+                cursor.insertText("\n")
+
+            # Применяем форматирование для каждой строки
+            cursor.movePosition(QTextCursor.End)
+            block_format = cursor.blockFormat()
+            block_format.setAlignment(Qt.AlignCenter)
+            cursor.setBlockFormat(block_format)
+
+            char_format = QTextCharFormat()
+            if self._is_quote(line):
+                char_format.setFontItalic(True)
+            else:
+                char_format.setFontItalic(False)
+                char_format.setForeground(Qt.white)
+            cursor.setCharFormat(char_format)
+
+            cursor.insertText(line)
+
         self.start_button.setVisible(True)
-        self.skip_button.setVisible(False)  # 👈 скрываем кнопку "Пропустить"
+        self.skip_button.setVisible(False)
 
 
     def on_start_clicked(self):
@@ -180,4 +229,3 @@ class IntroScreen(QWidget):
         if not self.intro_started:
             self.intro_started = True
             QTimer.singleShot(500, self.start_typewriter)
-

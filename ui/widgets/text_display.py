@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QWidget
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
-from PyQt5.QtGui import QFont, QTextCursor, QPalette
+from PyQt5.QtGui import QFont, QTextCursor, QPalette, QTextBlockFormat, QTextOption
 
 from utils.config import GameConfig
 
@@ -26,13 +26,26 @@ class TextDisplay(QTextEdit):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setWordWrapMode(1)  # QTextOption.WordWrap
 
+        # Установка выравнивания по центру
+        self.setAlignment(Qt.AlignCenter)
+
+        # Настройка межстрочного интервала через стили документа
+        document = self.document()
+        document.setDefaultStyleSheet("""
+            p {
+                line-height: 0.8;
+                margin-top: 0px;
+                margin-bottom: 0px;
+                text-align: center;
+            }
+        """)
+
         self.setStyleSheet(f"""
             QTextEdit {{
                 background-color: transparent;
                 border: none;
                 color: {GameConfig.TEXT_COLOR};
                 padding: 20px;
-                line-height: 1.8;
                 selection-background-color: {GameConfig.ACCENT_COLOR};
             }}
         """)
@@ -60,10 +73,12 @@ class TextDisplay(QTextEdit):
 
         # Если текущая строка пустая, переходим к следующей
         if not current_line.strip():
-            self.append("")
+            cursor = self.textCursor()
+            cursor.movePosition(QTextCursor.End)
+            cursor.insertText("\n")
             self.current_line_index += 1
             self.current_char_index = 0
-            return  # Важно: выходим, чтобы не вставлять символ дальше
+            return
 
         # Если дошли до конца строки
         if self.current_char_index >= len(current_line):
@@ -72,19 +87,33 @@ class TextDisplay(QTextEdit):
 
             # Добавляем новую строку только если это не последняя строка
             if self.current_line_index < len(self.current_text_lines):
-                self.append("")
-            return  # Важно: выходим, чтобы не вставлять символ дальше
+                cursor = self.textCursor()
+                cursor.movePosition(QTextCursor.End)
+                cursor.insertText("\n")
+            return
+
+        cursor = self.textCursor()
+
+        # При начале новой строки устанавливаем центрирование и проверяем на цитату
+        if self.current_char_index == 0:
+            cursor.movePosition(QTextCursor.End)
+            if self.current_line_index > 0:
+                cursor.insertText("\n")
+            block_format = QTextBlockFormat()
+            block_format.setAlignment(Qt.AlignCenter)
+            block_format.setLineHeight(80, QTextBlockFormat.ProportionalHeight)  # Уменьшаем межстрочный интервал
+            cursor.setBlockFormat(block_format)
+
+            # Проверяем, является ли строка цитатой
+            if self._is_quote(current_line):
+                from PyQt5.QtGui import QTextCharFormat
+                char_format = QTextCharFormat()
+                char_format.setFontItalic(True)
+                cursor.setCharFormat(char_format)
 
         # Добавляем следующий символ
-        char = current_line[self.current_char_index]
-        cursor = self.textCursor()
         cursor.movePosition(QTextCursor.End)
-
-        # Если это первый символ в строке, создаем новую строку
-        if self.current_char_index == 0 and self.current_line_index > 0:
-            cursor.insertText("\n")
-            cursor.movePosition(QTextCursor.End)
-
+        char = current_line[self.current_char_index]
         cursor.insertText(char)
         self.current_char_index += 1
 
@@ -106,11 +135,14 @@ class TextDisplay(QTextEdit):
             self.text_finished.emit()
 
     def append_text(self, text):
-        self.append("")
-        self.append(text)
+        cursor = self.textCursor()
+        cursor.movePosition(QTextCursor.End)
+        cursor.insertText("\n" + text)
+        # Применяем центрирование к новому блоку
+        block_format = QTextBlockFormat()
+        block_format.setAlignment(Qt.AlignCenter)
+        cursor.setBlockFormat(block_format)
         self.ensureCursorVisible()
-
-
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and self.typewriter_timer.isActive():
@@ -118,12 +150,45 @@ class TextDisplay(QTextEdit):
         else:
             super().mousePressEvent(event)
 
+    def _is_quote(self, line):
+        """Определяет, является ли строка цитатой"""
+        line = line.strip()
+        return (
+            (line.startswith("'") and line.endswith("'")) or
+            (line.startswith('"') and line.endswith('"')) or
+            (line.startswith("«") and line.endswith("»")) or
+            (line.startswith(""") and line.endswith(""")) or
+            ("'Хранилище знаний" in line) or  # Для конкретной цитаты из игры
+            ("The number is the answer" in line) or
+            ("Solve:" in line)
+        )
+
     def insert_all_text(self):
         self.clear()
         cursor = self.textCursor()
+
         for i, line in enumerate(self.current_text_lines):
             if i > 0:
-                cursor.insertBlock()  # создаёт новый блок, но без лишнего форматирования
-            cursor.insertText(line)
-        self.setTextCursor(cursor)
+                cursor.insertBlock()
 
+            # Применяем центрирование и уменьшенный межстрочный интервал к каждому блоку
+            block_format = QTextBlockFormat()
+            block_format.setAlignment(Qt.AlignCenter)
+            block_format.setLineHeight(80, QTextBlockFormat.ProportionalHeight)  # 80% от обычной высоты
+            cursor.setBlockFormat(block_format)
+
+            # Проверяем на цитату и применяем курсив
+            if self._is_quote(line):
+                from PyQt5.QtGui import QTextCharFormat
+                char_format = QTextCharFormat()
+                char_format.setFontItalic(True)
+                cursor.setCharFormat(char_format)
+            else:
+                from PyQt5.QtGui import QTextCharFormat
+                char_format = QTextCharFormat()
+                char_format.setFontItalic(False)
+                cursor.setCharFormat(char_format)
+
+            cursor.insertText(line)
+
+        self.setTextCursor(cursor)
