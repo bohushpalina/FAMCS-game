@@ -314,7 +314,8 @@ class GameScreen(QWidget):
         if msg.clickedButton() == menu_button:
             self.return_to_menu.emit()
         elif msg.clickedButton() == restart_button:
-            self.start_new_game()
+            self.return_to_menu.emit()
+
 
     def keyPressEvent(self, event):
         if event.key() in (Qt.Key_Return, Qt.Key_Enter):

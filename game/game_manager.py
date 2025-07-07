@@ -71,21 +71,6 @@ class GameManager(QObject):
             self.choices_updated.emit([StoryText.ROOM_605_FIRST_ACTION])
 
 
-    def _reset_room_605(self):
-        """Сброс описания и обновление кнопок"""
-        # Если игрок уже готов проснуться — НЕ сбрасываем старые действия
-        if self.room_605_wake_up_ready:
-            self.story_updated.emit((StoryText.ROOM_605_DESCRIPTION, True))
-            self.choices_updated.emit([StoryText.ROOM_605_WAKE_UP])
-            return
-
-        # Стандартный сброс
-        self.story_updated.emit((StoryText.ROOM_605_DESCRIPTION, True))
-        actions = StoryText.ROOM_605_ACTIONS.copy()
-        if self.room_605_new_action_shown:
-            actions.append(StoryText.ROOM_605_NEW_ACTION)
-        self.choices_updated.emit(actions)
-
 
 
 
@@ -201,7 +186,7 @@ class GameManager(QObject):
                     "items": [StoryText.ROOM_605_FINAL_ACTION],
                     "numbered": False
                 })
-                self.location_changed.emit("На часах — 6:05")  # <- Просто красивый заголовок
+                self.location_changed.emit("На часах — 6:05")
                 self.story_updated.emit(StoryText.ROOM_605_WAKE_UP_TEXT)
 
             # Кнопка 4 — Завершить
@@ -275,17 +260,3 @@ class GameManager(QObject):
         thread = threading.Thread(target=final_animation)
         thread.daemon = True
         thread.start()
-
-    def get_inventory(self):
-        """Получить инвентарь"""
-        return self.game_state.inventory
-
-    def save_game(self):
-        """Сохранить игру"""
-        # TODO: Реализовать сохранение
-        pass
-
-    def load_game(self):
-        """Загрузить игру"""
-        # TODO: Реализовать загрузку
-        pass
