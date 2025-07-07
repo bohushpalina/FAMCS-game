@@ -23,14 +23,21 @@ class GameManager(QObject):
         self.room_605_click_count = 0
         self.room_605_new_action_shown = False
         self.room_605_wake_up_ready = False
+        self.game_over = False
+        self.room_605_final_action_shown = False  # <--- Добавь сюда
+
 
     def start_new_game(self):
         """Начать новую игру"""
+        self.game_over = False  # <-- сброс
         self.game_state.reset()
         self.change_location("entrance_hall")
 
     def change_location(self, location_name):
         """Изменить локацию"""
+        if self.game_over:
+            print(f"Попытка сменить локацию на {location_name} после завершения игры — игнорируем")
+            return  # Не меняем локацию после окончания игры
         self.current_location = location_name
         self.game_state.current_location = location_name
         self.location_changed.emit(location_name)
@@ -41,6 +48,10 @@ class GameManager(QObject):
     def load_location_content(self, location_name):
         """Загрузить контент локации"""
         from data.story_text import StoryText
+
+        if self.game_over:
+            print(f"Игра завершена, не загружаем локацию {location_name}")  # debug
+            return  # Не загружаем больше никакие сцены после финала
 
         if location_name == "entrance_hall":
             self.story_updated.emit(StoryText.ENTRANCE_HALL_DESCRIPTION)
@@ -57,7 +68,8 @@ class GameManager(QObject):
 
         elif location_name == "room_605":
             self.story_updated.emit(StoryText.ROOM_605_DESCRIPTION)
-            self.choices_updated.emit(StoryText.ROOM_605_ACTIONS)
+            self.choices_updated.emit([StoryText.ROOM_605_FIRST_ACTION])
+
 
     def _reset_room_605(self):
         """Сброс описания и обновление кнопок"""
@@ -80,6 +92,10 @@ class GameManager(QObject):
     def make_choice(self, choice_index):
         """Обработка выбора игрока"""
         location = self.current_location
+
+        """Обработка выбора игрока"""
+        if self.game_over:
+            return  # Блокируем действия после завершения игры
 
             # Обработка выбора в холле
         if location == "entrance_hall":
@@ -146,47 +162,69 @@ class GameManager(QObject):
                     QTimer.singleShot(7000, reset_room_521)
 
         elif location == "room_605":
-            current_actions = StoryText.ROOM_605_ACTIONS
-            if self.room_605_wake_up_ready:
-                current_actions = [StoryText.ROOM_605_WAKE_UP]
-            if self.room_605_new_action_shown:
-                current_actions = StoryText.ROOM_605_ACTIONS + [StoryText.ROOM_605_NEW_ACTION]
+            if self.room_605_final_action_shown:
+                current_actions = [StoryText.ROOM_605_FINAL_ACTION]
+            elif self.room_605_wake_up_ready:
+                    current_actions = [StoryText.ROOM_605_WAKE_UP]
+            elif self.room_605_new_action_shown:
+                current_actions = [StoryText.ROOM_605_SECOND_ACTION]
+            else:
+                current_actions = [StoryText.ROOM_605_FIRST_ACTION]
 
             if 0 <= choice_index < len(current_actions):
-                    choice = current_actions[choice_index]
+                choice = current_actions[choice_index]
+            else:
+                return  # Неверный индекс — выходим
 
-            if not self.room_605_new_action_shown and choice in StoryText.ROOM_605_ACTIONS:
-                self.room_605_click_count += 1
-                if self.room_605_click_count >= 2:
-                    self.room_605_new_action_shown = True
-
-
-            if choice == "Осмотреть комнату":
-                self.story_updated.emit([StoryText.ROOM_605_MESSAGES_INSPECT])
-                if not self.room_605_wake_up_ready:
-                    QTimer.singleShot(6000, self._reset_room_605)
-            elif choice == "Выйти из аудитории":
-                self.story_updated.emit([StoryText.ROOM_605_MESSAGES_EXIT])
-                if not self.room_605_wake_up_ready:
-                    QTimer.singleShot(6000, self._reset_room_605)
-            elif choice == StoryText.ROOM_605_NEW_ACTION:
+            if choice == StoryText.ROOM_605_FIRST_ACTION:
                 self.story_updated.emit(StoryText.ROOM_605_WINDOW_DESCRIPTION)
 
-                def enable_wake_up():
-                    self.room_605_wake_up_ready = True
+                def show_inspect_button():
+                    self.choices_updated.emit([StoryText.ROOM_605_SECOND_ACTION])
+                    self.room_605_new_action_shown = True
+
+                QTimer.singleShot(
+                    len(StoryText.ROOM_605_WINDOW_DESCRIPTION) * GameConfig.TYPEWRITER_SPEED * 30 + 1000,
+                    show_inspect_button
+                    )
+
+            elif choice == StoryText.ROOM_605_SECOND_ACTION and not self.room_605_wake_up_ready:
+                self.story_updated.emit(StoryText.ROOM_605_INSPECT_TEXT)
+
+                def show_wake_up_button():
                     self.choices_updated.emit([StoryText.ROOM_605_WAKE_UP])
+                    self.room_605_wake_up_ready = True
 
-                QTimer.singleShot(len(StoryText.ROOM_605_WINDOW_DESCRIPTION) * GameConfig.TYPEWRITER_SPEED * 30 + 6000, enable_wake_up)
+                QTimer.singleShot(
+                    len(StoryText.ROOM_605_INSPECT_TEXT) * GameConfig.TYPEWRITER_SPEED * 30 + 1000,
+                    show_wake_up_button
+                )
 
-            elif "Проснуться" in choice:
+            elif choice == StoryText.ROOM_605_WAKE_UP:
                 self.story_updated.emit(StoryText.ROOM_605_WAKE_UP_TEXT)
 
+                def show_final_button():
+                    self.choices_updated.emit([StoryText.ROOM_605_FINAL_ACTION])
+                    self.room_605_final_action_shown = True
+
+
+                QTimer.singleShot(
+                    len(StoryText.ROOM_605_WAKE_UP_TEXT) * GameConfig.TYPEWRITER_SPEED * 30 + 1000,
+                    show_final_button
+                )
+
+            elif choice == StoryText.ROOM_605_FINAL_ACTION:
+                self.choices_updated.emit([])
+
                 def show_credits():
-                    self.story_updated.emit(StoryText.CREDITS)
-                    self.choices_updated.emit([])  # Убираем все кнопки
+                    print("Игра завершена — показываем титры")  # debug
+                    self.story_updated.emit(StoryText.CREDITS)  # Просто показываем текст титров
+                    self.game_over = True
                     self.game_ended.emit(True)
 
-                QTimer.singleShot(len(StoryText.ROOM_605_WAKE_UP_TEXT) * GameConfig.TYPEWRITER_SPEED * 30 + 2000, show_credits)
+                QTimer.singleShot(1500, show_credits)
+
+
 
 
 

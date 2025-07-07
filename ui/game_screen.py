@@ -21,6 +21,8 @@ class GameScreen(QWidget):
         self.setup_styling()
         self.connect_signals()
         self.processing_answer = False
+        self.game_over = False
+
 
     def init_ui(self):
         """Инициализация интерфейса"""
@@ -207,9 +209,16 @@ class GameScreen(QWidget):
 
     # Обновление кнопок выбора
     def on_choices_updated(self, choices):
-        self.choice_buttons.set_choices(choices)
-        self.puzzle_frame.setVisible(False)
-        self.choice_buttons.setVisible(True)  # Вместо show_choices()
+        if not choices:
+            self.choice_buttons.hide()
+            # Если есть надпись "Выберите действие", её тоже скрыть
+            # например:
+            # self.choose_label.hide()
+        else:
+            self.choice_buttons.show()
+            self.choice_buttons.set_choices(choices)
+            self.puzzle_frame.setVisible(False)
+
 
 
     # Начало головоломки: показываем вопрос и поле ввода
@@ -277,14 +286,17 @@ class GameScreen(QWidget):
 
     # Обработка окончания игры
     def on_game_ended(self, victory):
+        self.game_over = True
         if victory:
-            msg = QMessageBox(self)
-            msg.setWindowTitle("🎉 Поздравляем!")
-            msg.setText("Вы успешно прошли University Quest!\n\nБыло ли это сном или реальностью?")
-            msg.setIcon(QMessageBox.Information)
-            msg.setStandardButtons(QMessageBox.Ok)
-            msg.exec_()
-        QTimer.singleShot(1000, self.return_to_menu.emit)
+            # Убираем всплывающее окно с поздравлением
+            # Просто оставляем игру в состоянии конца, без перехода
+
+            # Если нужно, можно дополнительно заблокировать выборы
+            self.choice_buttons.set_choices([])  # Убрать кнопки
+            self.puzzle_frame.setVisible(False)
+            # Можно показать какое-то финальное сообщение или оставить титры,
+            # это уже делает GameManager через story_updated.emit(StoryText.CREDITS)
+
 
     # Меню игры
     def show_menu_dialog(self):
