@@ -70,7 +70,6 @@ class GameManager(QObject):
             self.story_updated.emit(StoryText.ROOM_521_DESCRIPTION)
             # Запускаем головоломку с числовой последовательностью
             self.start_pi_puzzle()
-            self.sound_manager.play_sound_effect("key_splash")
 
         elif location_name == "room_605":
             self.story_updated.emit(StoryText.ROOM_605_DESCRIPTION)
@@ -121,9 +120,9 @@ class GameManager(QObject):
             if 0 <= choice_index < len(StoryText.AFTER_LIBRARY_CHOICES):
                 choice = StoryText.AFTER_LIBRARY_CHOICES[choice_index]
 
-                QTimer.singleShot(4000, lambda: self.sound_manager.play_sound_effect("key_splash"))
 
                 if choice == "Аудитория 521":
+                    self.sound_manager.play_sound_effect("door_opening")
                     self.story_updated.emit([StoryText.AFTER_LIBRARY_RESPONSES[choice]])
                     self.change_location("room_521")
                     self.story_updated.emit(StoryText.ROOM_521_DESCRIPTION)
@@ -146,7 +145,6 @@ class GameManager(QObject):
                 response = StoryText.ROOM_521_CHOICES_RESPONSES.get(choice, "Это не тот путь. Стоит попробовать ещё раз.")
                 self.story_updated.emit([response])
             if choice == "Аудитория 605":
-                self.sound_manager.play_sound_effect("door_opening")
                 self.change_location("room_605")
             else:
 
@@ -197,6 +195,8 @@ class GameManager(QObject):
                     "numbered": False
                 })
                 self.sound_manager.play_sound_effect("alarm_clock")
+                QTimer.singleShot(500, lambda: self.sound_manager.play_sound_effect("alarm_clock"))
+
                 self.location_changed.emit("На часах — 6:05")
                 self.story_updated.emit(StoryText.ROOM_605_WAKE_UP_TEXT)
 
