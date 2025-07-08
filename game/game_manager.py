@@ -195,7 +195,7 @@ class GameManager(QObject):
                     "numbered": False
                 })
                 self.sound_manager.play_sound_effect("alarm_clock")
-                QTimer.singleShot(500, lambda: self.sound_manager.play_sound_effect("alarm_clock"))
+                QTimer.singleShot(1400, lambda: self.sound_manager.play_sound_effect("alarm_clock"))
 
                 self.location_changed.emit("На часах — 6:05")
                 self.story_updated.emit(StoryText.ROOM_605_WAKE_UP_TEXT)
