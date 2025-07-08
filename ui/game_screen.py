@@ -2,7 +2,8 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, QFrame, QMessageBox
 )
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPainter, QPixmap, QBrush, QColor
+import os
 
 from utils.config import GameConfig
 from ui.widgets.text_display import TextDisplay
@@ -18,11 +19,31 @@ class GameScreen(QWidget):
         super().__init__()
         self.game_manager = game_manager
         self.current_puzzle = None
+        self.current_background = None
+        self.background_pixmap = None
         self.init_ui()
         self.setup_styling()
         self.connect_signals()
         self.processing_answer = False
         self.game_over = False
+
+    def paintEvent(self, event):
+        """Отрисовка фонового изображения"""
+        if self.background_pixmap:
+            painter = QPainter(self)
+            # Масштабируем изображение под размер окна, сохраняя пропорции
+            scaled_pixmap = self.background_pixmap.scaled(
+                self.size(),
+                Qt.KeepAspectRatioByExpanding,
+                Qt.SmoothTransformation
+            )
+            # Центрируем изображение
+            x = (self.width() - scaled_pixmap.width()) // 2
+            y = (self.height() - scaled_pixmap.height()) // 2
+            painter.drawPixmap(x, y, scaled_pixmap)
+
+            # Добавляем затемнение для лучшей читаемости текста
+            painter.fillRect(self.rect(), QBrush(QColor(0, 0, 0, 200)))
 
 
     def init_ui(self):
@@ -36,6 +57,7 @@ class GameScreen(QWidget):
         top_panel = QFrame()
         top_panel.setFrameStyle(QFrame.StyledPanel)
         top_panel.setMaximumHeight(80)
+        top_panel.setObjectName("topPanel")
         top_layout = QHBoxLayout()
         top_layout.setContentsMargins(20, 15, 20, 15)
 
@@ -56,6 +78,7 @@ class GameScreen(QWidget):
         # Основной контент: текст истории, выборы и головоломки
         content_frame = QFrame()
         content_frame.setFrameStyle(QFrame.StyledPanel)
+        content_frame.setObjectName("contentFrame")
         content_layout = QVBoxLayout()
         content_layout.setContentsMargins(20, 20, 20, 20)
         content_layout.setSpacing(20)
@@ -78,6 +101,7 @@ class GameScreen(QWidget):
         # Головоломка — поле ввода с вопросом и кнопка подтверждения
         self.puzzle_frame = QFrame()
         self.puzzle_frame.setFrameStyle(QFrame.StyledPanel)
+        self.puzzle_frame.setObjectName("puzzleFrame")
         puzzle_layout = QVBoxLayout()
         puzzle_layout.setContentsMargins(20, 15, 20, 15)
 
@@ -128,11 +152,21 @@ class GameScreen(QWidget):
                 color: white;
                 font-family: 'Segoe Script', cursive;
             }}
-            QFrame {{
-                background-color: {GameConfig.BUTTON_COLOR};
+            QFrame#topPanel {{
+               background-color: rgba(42, 42, 42, 200);
+               border-radius: 15px;
+               border: none;
+            }}
+            QFrame#contentFrame {{
+                background-color: rgba(42, 42, 42, 200);
                 border-radius: 15px;
                 border: none;
             }}
+           QFrame#puzzleFrame {{
+               background-color: rgba(42, 42, 42, 200);
+               border-radius: 15px;
+               border: none;
+           }}
             QLabel {{
                 color: white;
                 background-color: transparent;
@@ -185,6 +219,30 @@ class GameScreen(QWidget):
     def start_new_game(self):
         self.game_manager.start_new_game()
 
+    def set_background(self, location_name):
+        """Установить фоновое изображение для локации"""
+
+        backgrounds_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "utils", "picture")
+
+        background_files = {
+            "entrance_hall": "hall.png",
+            "library": "biblio.png",
+            "room_521": "521.png",
+            "room_605": "605.png"
+        }
+
+        if location_name in background_files:
+            image_path = os.path.join(backgrounds_dir, background_files[location_name])
+
+            if os.path.exists(image_path):
+                self.background_pixmap = QPixmap(image_path)
+                if self.background_pixmap.isNull():
+                    print(f"Ошибка загрузки изображения: {image_path}")
+                self.update()  # Перерисовать виджет
+            else:
+                print(f"Фоновое изображение не найдено: {image_path}")
+
+
     # Обновление названия локации в заголовке
     def on_location_changed(self, location_name):
         location_names = {
@@ -198,23 +256,24 @@ class GameScreen(QWidget):
 
     # Обновление текста истории
     def on_story_updated(self, story_data):
-        # Позволяет передавать флаг "без анимации"
+        # Позволяет передавать флаг "без анимации" и флаг "титры"
         if isinstance(story_data, tuple):
-            story_lines, instant = story_data
+            if len(story_data) == 3:
+                story_lines, instant, is_credits = story_data
+                self.text_display.show_text(story_lines, use_typewriter=not instant, is_credits=is_credits)
+            else:
+                story_lines, instant = story_data
+                self.text_display.show_text(story_lines, use_typewriter=not instant)
         else:
             story_lines = story_data
-            instant = False
+            self.text_display.show_text(story_lines, use_typewriter=True)
 
-        self.text_display.show_text(story_lines, use_typewriter=not instant)
 
 
     # Обновление кнопок выбора
     def on_choices_updated(self, choices):
         if not choices:
             self.choice_buttons.hide()
-            # Если есть надпись "Выберите действие", её тоже скрыть
-            # например:
-            # self.choose_label.hide()
         else:
             self.choice_buttons.show()
             self.choice_buttons.set_choices(choices)
@@ -228,7 +287,6 @@ class GameScreen(QWidget):
         self.puzzle_label.setText(puzzle_data.get("question", ""))
         self.puzzle_input.clear()
         self.puzzle_input.setFocus()
-        self.puzzle_frame.setVisible(True)
         self.choice_buttons.hide_choices()
         self.puzzle_frame.setVisible(True)
 
@@ -288,16 +346,8 @@ class GameScreen(QWidget):
     # Обработка окончания игры
     def on_game_ended(self, victory):
         self.game_over = True
-        if victory:
-            # Убираем всплывающее окно с поздравлением
-            # Просто оставляем игру в состоянии конца, без перехода
-
-            # Если нужно, можно дополнительно заблокировать выборы
-            self.choice_buttons.set_choices([])  # Убрать кнопки
-            self.puzzle_frame.setVisible(False)
-            # Можно показать какое-то финальное сообщение или оставить титры,
-            # это уже делает GameManager через story_updated.emit(StoryText.CREDITS)
-
+        self.choice_buttons.set_choices([])
+        self.puzzle_frame.setVisible(False)
 
     # Меню игры
     def show_menu_dialog(self):

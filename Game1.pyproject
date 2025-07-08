@@ -23,6 +23,10 @@
         "utils/music/alarm_clock.mp3",
         "utils/music/typewriter_effect.mp3",
         "ui/splash_screen.py",
-        "utils/sound_manager.py"
+        "utils/sound_manager.py",
+        "utils/picture/521.png",
+        "utils/picture/605.png",
+        "utils/picture/biblio.png",
+        "utils/picture/hall.png"
     ]
 }
