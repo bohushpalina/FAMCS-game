@@ -220,6 +220,10 @@ class GameScreen(QWidget):
             QTextEdit {{
                 background-color: transparent;
             }}
+            QMessageBox {{
+                background-color: #2a2a2a;
+                color: white;
+            }}
         """)
 
     def connect_signals(self):
