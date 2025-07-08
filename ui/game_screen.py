@@ -48,8 +48,8 @@ class GameScreen(QWidget):
                 x = (self.width() - scaled_pixmap.width()) // 2
                 y = (self.height() - scaled_pixmap.height()) // 2
 
-                # Рисуем изображение с полупрозрачностью
-                painter.setOpacity(0.3)
+                # Рисуем изображение более четко (увеличили прозрачность)
+                painter.setOpacity(0.7)
                 painter.drawPixmap(x, y, scaled_pixmap)
                 painter.setOpacity(1.0)
             except Exception as e:
@@ -163,17 +163,17 @@ class GameScreen(QWidget):
                 font-family: 'Segoe Script', cursive;
             }}
             QFrame#topPanel {{
-               background-color: rgba(42, 42, 42, 220);
+               background-color: rgba(42, 42, 42, 180);
                border-radius: 15px;
                border: none;
             }}
             QFrame#contentFrame {{
-                background-color: rgba(42, 42, 42, 220);
+                background-color: rgba(42, 42, 42, 150);
                 border-radius: 15px;
                 border: none;
             }}
            QFrame#puzzleFrame {{
-               background-color: rgba(42, 42, 42, 220);
+               background-color: rgba(42, 42, 42, 150);
                border-radius: 15px;
                border: none;
            }}
@@ -184,7 +184,7 @@ class GameScreen(QWidget):
                 font-weight: bold;
             }}
             QPushButton {{
-                background-color: rgba(68, 68, 68, 220);
+                background-color: rgba(68, 68, 68, 180);
                 color: white;
                 border: none;
                 border-radius: 15px;
@@ -195,7 +195,7 @@ class GameScreen(QWidget):
                 transition: background-color 0.3s ease;
             }}
             QPushButton:hover {{
-                background-color: rgba(102, 102, 102, 220);
+                background-color: rgba(102, 102, 102, 200);
                 cursor: pointer;
             }}
             QPushButton:pressed {{
@@ -203,7 +203,7 @@ class GameScreen(QWidget):
                 color: {GameConfig.BACKGROUND_COLOR};
             }}
             QLineEdit {{
-                background-color: rgba(26, 26, 26, 220);
+                background-color: rgba(26, 26, 26, 180);
                 color: white;
                 border: 2px solid transparent;
                 border-radius: 10px;
@@ -214,7 +214,7 @@ class GameScreen(QWidget):
             }}
             QLineEdit:focus {{
                 border-color: {GameConfig.ACCENT_COLOR};
-                background-color: rgba(42, 42, 42, 220);
+                background-color: rgba(42, 42, 42, 200);
             }}
             QTextEdit {{
                 background-color: transparent;
@@ -256,7 +256,8 @@ class GameScreen(QWidget):
                 "entrance_hall": ["hall.png", "hall.jpg", "hall.jpeg"],
                 "library": ["biblio.png", "biblio.jpg", "biblio.jpeg"],
                 "room_521": ["521.png", "521.jpg", "521.jpeg"],
-                "room_605": ["605.png", "605.jpg", "605.jpeg"]
+                "room_605": ["605.png", "605.jpg", "605.jpeg"],
+                "dormitory": ["dormitory.png", "dormitory.jpg", "dormitory.jpeg"]
             }
 
             if location_name not in background_files:
@@ -311,6 +312,7 @@ class GameScreen(QWidget):
             "library": "Библиотека",
             "room_521": "Аудитория 521",
             "room_605": "Аудитория 605",
+            "dormitory": "Общежитие",
             "На часах — 6:05": "На часах — 6:05"
         }
         self.location_label.setText(location_names.get(location_name, location_name))
@@ -325,6 +327,11 @@ class GameScreen(QWidget):
         if isinstance(story_data, tuple):
             if len(story_data) == 3:
                 story_lines, instant, is_credits = story_data
+                # Для титров устанавливаем черный фон
+                if is_credits:
+                    self.background_pixmap = None
+                    self.current_background = None
+                    self.update()
                 self.text_display.show_text(story_lines, use_typewriter=not instant, is_credits=is_credits)
             else:
                 story_lines, instant = story_data
