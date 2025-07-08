@@ -3,6 +3,7 @@ from game.game_state import GameState
 from data.story_text import StoryText
 from PyQt5.QtCore import QTimer
 from utils.config import GameConfig
+from utils.sound_manager import SoundManager
 
 
 class GameManager(QObject):
@@ -19,6 +20,8 @@ class GameManager(QObject):
     def __init__(self):
         super().__init__()
         self.game_state = GameState()
+        self.sound_manager = SoundManager()
+        self.sound_manager.load_sounds()
         self.current_location = None
         self.room_605_click_count = 0
         self.room_605_new_action_shown = False
@@ -29,9 +32,10 @@ class GameManager(QObject):
 
     def start_new_game(self):
         """Начать новую игру"""
-        self.game_over = False  # <-- сброс
+        self.game_over = False
         self.game_state.reset()
         self.reset_room_605_state()
+        self.sound_manager.play_background_music()
         self.change_location("entrance_hall")
 
     def change_location(self, location_name):
@@ -66,6 +70,7 @@ class GameManager(QObject):
             self.story_updated.emit(StoryText.ROOM_521_DESCRIPTION)
             # Запускаем головоломку с числовой последовательностью
             self.start_pi_puzzle()
+            self.sound_manager.play_sound_effect("key_splash")
 
         elif location_name == "room_605":
             self.story_updated.emit(StoryText.ROOM_605_DESCRIPTION)
@@ -115,6 +120,9 @@ class GameManager(QObject):
         elif location == "library_after_puzzle":
             if 0 <= choice_index < len(StoryText.AFTER_LIBRARY_CHOICES):
                 choice = StoryText.AFTER_LIBRARY_CHOICES[choice_index]
+
+                QTimer.singleShot(4000, lambda: self.sound_manager.play_sound_effect("key_splash"))
+
                 if choice == "Аудитория 521":
                     self.story_updated.emit([StoryText.AFTER_LIBRARY_RESPONSES[choice]])
                     self.change_location("room_521")
@@ -138,6 +146,7 @@ class GameManager(QObject):
                 response = StoryText.ROOM_521_CHOICES_RESPONSES.get(choice, "Это не тот путь. Стоит попробовать ещё раз.")
                 self.story_updated.emit([response])
             if choice == "Аудитория 605":
+                self.sound_manager.play_sound_effect("door_opening")
                 self.change_location("room_605")
             else:
 
@@ -187,12 +196,14 @@ class GameManager(QObject):
                     "items": [StoryText.ROOM_605_FINAL_ACTION],
                     "numbered": False
                 })
+                self.sound_manager.play_sound_effect("alarm_clock")
                 self.location_changed.emit("На часах — 6:05")
                 self.story_updated.emit(StoryText.ROOM_605_WAKE_UP_TEXT)
 
             # Кнопка 4 — Завершить
             elif choice == StoryText.ROOM_605_FINAL_ACTION:
                 self.choices_updated.emit([])
+                self.sound_manager.play_credits_music()  # Запускаем музыку для титров
                 self.story_updated.emit(StoryText.CREDITS)
                 self.game_over = True
                 self.game_ended.emit(True)
@@ -233,8 +244,8 @@ class GameManager(QObject):
         if location == "library":
             if answer == "521":
                 self.game_state.add_item("room_521_key")
-                # Выводим предупреждение и сообщение о ключе
-                self.story_updated.emit(StoryText.LIBRARY_MATH_WARNING + StoryText.LIBRARY_KEY_FOUND + ["Куда отправиться?"])
+                self.sound_manager.play_sound_effect("key_splash")
+                self.story_updated.emit(StoryText.LIBRARY_KEY_FOUND + ["Куда отправиться?"])
                 # Показываем варианты выбора аудиторий
                 self.choices_updated.emit(StoryText.AFTER_LIBRARY_CHOICES)
                 # Меняем локацию, чтобы обработка выбора после библиотеки была корректной

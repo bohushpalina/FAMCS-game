@@ -5,6 +5,7 @@ from PyQt5.QtGui import QFont, QTextCursor, QPalette, QTextCharFormat
 
 from utils.config import GameConfig
 from data.story_text import StoryText
+from utils.sound_manager import SoundManager
 
 class IntroScreen(QWidget):
     """Экран предыстории и главного меню"""
@@ -127,12 +128,17 @@ class IntroScreen(QWidget):
         self.current_line = 0
         self.current_char = 0
         self.story_text.clear()
+        if hasattr(self.game_manager, 'sound_manager'):
+            self.game_manager.sound_manager.play_typewriter_sound()
         self.typewriter_timer.start(GameConfig.TYPEWRITER_SPEED)
+
 
     def typewriter_effect(self):
         """Эффект печатной машинки"""
         if self.current_line >= len(StoryText.INTRO_TEXT):
             self.typewriter_timer.stop()
+            if hasattr(self.game_manager, 'sound_manager'):
+                self.game_manager.sound_manager.stop_typewriter_sound()
             self.start_button.setVisible(True)
             self.skip_button.setVisible(False)
             return
@@ -192,6 +198,8 @@ class IntroScreen(QWidget):
     def skip_intro(self):
         """Пропустить интро"""
         self.typewriter_timer.stop()
+        if hasattr(self.game_manager, 'sound_manager'):
+            self.game_manager.sound_manager.stop_typewriter_sound()
         self.story_text.clear()
 
         cursor = self.story_text.textCursor()

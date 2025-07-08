@@ -18,6 +18,11 @@
         "utils/config.py",
         "utils/music/credits.mp3",
         "utils/music/title_theme.mp3",
-        "ui/splash_screen.py"
+        "utils/music/key_splash.mp3",
+        "utils/music/door_opening.mp3",
+        "utils/music/alarm_clock.mp3",
+        "utils/music/typewriter_effect.mp3",
+        "ui/splash_screen.py",
+        "utils/sound_manager.py"
     ]
 }
