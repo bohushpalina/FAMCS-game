@@ -234,6 +234,10 @@ class IntroScreen(QWidget):
 
     def showEvent(self, event):
         super().showEvent(event)
+
+        if hasattr(self.game_manager, 'sound_manager'):
+            self.game_manager.sound_manager.credits_player.stop()
+
         if not self.intro_started:
             self.intro_started = True
             QTimer.singleShot(500, self.start_typewriter)

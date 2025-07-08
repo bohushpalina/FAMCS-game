@@ -50,6 +50,7 @@ class SoundManager(QObject):
             self.typewriter_player.setMedia(QMediaContent(QUrl.fromLocalFile(typewriter_sound)))
 
     def play_background_music(self):
+        self.credits_player.stop()
         """Запустить фоновую музыку"""
         if self.background_player.state() != QMediaPlayer.PlayingState:
             self.background_player.play()
@@ -74,6 +75,7 @@ class SoundManager(QObject):
                 break
 
     def play_typewriter_sound(self):
+        self.credits_player.stop()
         """Воспроизвести звук печатной машинки"""
         if self.typewriter_player.state() != QMediaPlayer.PlayingState:
             self.typewriter_player.play()
@@ -81,6 +83,7 @@ class SoundManager(QObject):
     def stop_typewriter_sound(self):
         """Остановить звук печатной машинки"""
         self.typewriter_player.stop()
+        self.credits_player.stop()
 
     def set_background_volume(self, volume):
         """Установить громкость фоновой музыки (0-100)"""
