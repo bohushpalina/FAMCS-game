@@ -31,6 +31,7 @@ class GameManager(QObject):
         """Начать новую игру"""
         self.game_over = False  # <-- сброс
         self.game_state.reset()
+        self.reset_room_605_state()
         self.change_location("entrance_hall")
 
     def change_location(self, location_name):
@@ -197,7 +198,11 @@ class GameManager(QObject):
                 self.game_ended.emit(True)
 
 
-
+    def reset_room_605_state(self):
+        self.room_605_click_count = 0
+        self.room_605_new_action_shown = False
+        self.room_605_wake_up_ready = False
+        self.room_605_final_action_shown = False
 
 
 
