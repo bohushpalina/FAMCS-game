@@ -204,10 +204,10 @@ class GameManager(QObject):
             elif choice == StoryText.ROOM_605_FINAL_ACTION:
                 self.choices_updated.emit([])
                 self.sound_manager.play_credits_music()  # Запускаем музыку для титров
-                self.story_updated.emit(StoryText.CREDITS)
+                # Передаем флаг is_credits=True в третьем параметре
+                self.story_updated.emit((StoryText.CREDITS, False, True))
                 self.game_over = True
                 self.game_ended.emit(True)
-
 
     def reset_room_605_state(self):
         self.room_605_click_count = 0

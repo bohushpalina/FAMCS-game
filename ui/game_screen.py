@@ -26,6 +26,7 @@ class GameScreen(QWidget):
         self.connect_signals()
         self.processing_answer = False
         self.game_over = False
+        self.showing_credits = False  # Флаг для отслеживания титров
 
     def paintEvent(self, event):
         """Отрисовка фонового изображения"""
@@ -34,8 +35,8 @@ class GameScreen(QWidget):
         # Сначала рисуем черный фон
         painter.fillRect(self.rect(), QBrush(QColor(26, 26, 26)))
 
-        # Рисуем фоновое изображение, если оно загружено
-        if self.background_pixmap and not self.background_pixmap.isNull():
+        # Рисуем фоновое изображение, если оно загружено и мы не показываем титры
+        if self.background_pixmap and not self.background_pixmap.isNull() and not self.showing_credits:
             try:
                 # Масштабируем изображение под размер окна, сохраняя пропорции
                 scaled_pixmap = self.background_pixmap.scaled(
@@ -230,6 +231,7 @@ class GameScreen(QWidget):
         self.game_manager.game_ended.connect(self.on_game_ended)
 
     def start_new_game(self):
+        self.showing_credits = False  # Сбрасываем флаг титров при новой игре
         self.game_manager.start_new_game()
 
     def load_background_image(self, location_name):
@@ -257,7 +259,8 @@ class GameScreen(QWidget):
                 "library": ["biblio.png", "biblio.jpg", "biblio.jpeg"],
                 "room_521": ["521.png", "521.jpg", "521.jpeg"],
                 "room_605": ["605.png", "605.jpg", "605.jpeg"],
-                "dormitory": ["dormitory.png", "dormitory.jpg", "dormitory.jpeg"]
+                "dormitory": ["dormitory.png", "dormitory.jpg", "dormitory.jpeg"],
+                "final_scene": ["dormitory.png", "dormitory.jpg", "dormitory.jpeg"]  # Для финальной сцены используем общежитие
             }
 
             if location_name not in background_files:
@@ -318,21 +321,26 @@ class GameScreen(QWidget):
         self.location_label.setText(location_names.get(location_name, location_name))
 
         # Устанавливаем фоновое изображение
-        if location_name != "На часах — 6:05":
+        if location_name == "На часах — 6:05":
+            # Для финальной сцены используем фон общежития
+            self.set_background("final_scene")
+        else:
             self.set_background(location_name)
 
     # Обновление текста истории
     def on_story_updated(self, story_data):
-        # Позволяет передавать флаг "без анимации" и флаг "титры"
         if isinstance(story_data, tuple):
             if len(story_data) == 3:
                 story_lines, instant, is_credits = story_data
-                # Для титров устанавливаем черный фон
+                # Для титров устанавливаем флаг и убираем фон
                 if is_credits:
-                    self.background_pixmap = None
+                    self.showing_credits = True
+                    self.background_pixmap = None  # Очищаем фоновое изображение
                     self.current_background = None
-                    self.update()
-                self.text_display.show_text(story_lines, use_typewriter=not instant, is_credits=is_credits)
+                    self.update()  # Перерисовать без фона
+                else:
+                    self.showing_credits = False
+                self.text_display.show_text(story_lines, use_typewriter=not instant)
             else:
                 story_lines, instant = story_data
                 self.text_display.show_text(story_lines, use_typewriter=not instant)
