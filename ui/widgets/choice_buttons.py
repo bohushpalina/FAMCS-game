@@ -17,8 +17,10 @@ class ChoiceButtons(QWidget):
     def setup_widget(self):
         """Настройка виджета"""
         self.layout = QVBoxLayout()
-        self.layout.setContentsMargins(0, 10, 0, 10)
+        self.layout.setSpacing(8)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(10)
+        self.layout.setAlignment(Qt.AlignCenter)
 
         # Заголовок
         self.title_label = QLabel("Выберите действие:")
@@ -32,18 +34,21 @@ class ChoiceButtons(QWidget):
         self.setStyleSheet(f"""
             QLabel {{
                 color: {GameConfig.ACCENT_COLOR};
-                margin: 10px 0;
+                margin: 5px 0;
             }}
 
             QPushButton {{
                 background-color: {GameConfig.BUTTON_COLOR};
                 color: {GameConfig.TEXT_COLOR};
                 border: 2px solid {GameConfig.ACCENT_COLOR};
-                border-radius: 8px;
+                border-radius: 6px;
                 padding: 12px 20px;
                 font-weight: bold;
-                text-align: left;
-                min-height: 40px;
+                text-align: center;
+                min-height: 45px;
+                max-height: 50px;
+                min-width: 600px;
+                max-width: 610px;
             }}
 
             QPushButton:hover {{
