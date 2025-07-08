@@ -29,22 +29,31 @@ class GameScreen(QWidget):
 
     def paintEvent(self, event):
         """Отрисовка фонового изображения"""
-        if self.background_pixmap:
-            painter = QPainter(self)
-            # Масштабируем изображение под размер окна, сохраняя пропорции
-            scaled_pixmap = self.background_pixmap.scaled(
-                self.size(),
-                Qt.KeepAspectRatioByExpanding,
-                Qt.SmoothTransformation
-            )
-            # Центрируем изображение
-            x = (self.width() - scaled_pixmap.width()) // 2
-            y = (self.height() - scaled_pixmap.height()) // 2
-            painter.drawPixmap(x, y, scaled_pixmap)
+        painter = QPainter(self)
 
-            # Добавляем затемнение для лучшей читаемости текста
-            painter.fillRect(self.rect(), QBrush(QColor(0, 0, 0, 200)))
+        # Сначала рисуем черный фон
+        painter.fillRect(self.rect(), QBrush(QColor(26, 26, 26)))
 
+        # Рисуем фоновое изображение, если оно загружено
+        if self.background_pixmap and not self.background_pixmap.isNull():
+            try:
+                # Масштабируем изображение под размер окна, сохраняя пропорции
+                scaled_pixmap = self.background_pixmap.scaled(
+                    self.size(),
+                    Qt.KeepAspectRatioByExpanding,
+                    Qt.SmoothTransformation
+                )
+
+                # Центрируем изображение
+                x = (self.width() - scaled_pixmap.width()) // 2
+                y = (self.height() - scaled_pixmap.height()) // 2
+
+                # Рисуем изображение с полупрозрачностью
+                painter.setOpacity(0.3)
+                painter.drawPixmap(x, y, scaled_pixmap)
+                painter.setOpacity(1.0)
+            except Exception as e:
+                print(f"Ошибка при отрисовке фона: {e}")
 
     def init_ui(self):
         """Инициализация интерфейса"""
@@ -105,7 +114,6 @@ class GameScreen(QWidget):
         puzzle_layout = QVBoxLayout()
         puzzle_layout.setContentsMargins(20, 15, 20, 15)
 
-
         self.puzzle_label = QLabel()
         self.puzzle_label.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.STORY_FONT_SIZE))
         self.puzzle_label.setWordWrap(True)
@@ -147,23 +155,25 @@ class GameScreen(QWidget):
     def setup_styling(self):
         """Применение стилей"""
         self.setStyleSheet(f"""
+            GameScreen {{
+                background: transparent;
+            }}
             QWidget {{
-                background-color: {GameConfig.BACKGROUND_COLOR};
                 color: white;
                 font-family: 'Segoe Script', cursive;
             }}
             QFrame#topPanel {{
-               background-color: rgba(42, 42, 42, 200);
+               background-color: rgba(42, 42, 42, 220);
                border-radius: 15px;
                border: none;
             }}
             QFrame#contentFrame {{
-                background-color: rgba(42, 42, 42, 200);
+                background-color: rgba(42, 42, 42, 220);
                 border-radius: 15px;
                 border: none;
             }}
            QFrame#puzzleFrame {{
-               background-color: rgba(42, 42, 42, 200);
+               background-color: rgba(42, 42, 42, 220);
                border-radius: 15px;
                border: none;
            }}
@@ -174,7 +184,7 @@ class GameScreen(QWidget):
                 font-weight: bold;
             }}
             QPushButton {{
-                background-color: #444;
+                background-color: rgba(68, 68, 68, 220);
                 color: white;
                 border: none;
                 border-radius: 15px;
@@ -185,7 +195,7 @@ class GameScreen(QWidget):
                 transition: background-color 0.3s ease;
             }}
             QPushButton:hover {{
-                background-color: #666;
+                background-color: rgba(102, 102, 102, 220);
                 cursor: pointer;
             }}
             QPushButton:pressed {{
@@ -193,7 +203,7 @@ class GameScreen(QWidget):
                 color: {GameConfig.BACKGROUND_COLOR};
             }}
             QLineEdit {{
-                background-color: {GameConfig.BACKGROUND_COLOR};
+                background-color: rgba(26, 26, 26, 220);
                 color: white;
                 border: 2px solid transparent;
                 border-radius: 10px;
@@ -204,7 +214,10 @@ class GameScreen(QWidget):
             }}
             QLineEdit:focus {{
                 border-color: {GameConfig.ACCENT_COLOR};
-                background-color: {GameConfig.BUTTON_COLOR};
+                background-color: rgba(42, 42, 42, 220);
+            }}
+            QTextEdit {{
+                background-color: transparent;
             }}
         """)
 
@@ -219,29 +232,77 @@ class GameScreen(QWidget):
     def start_new_game(self):
         self.game_manager.start_new_game()
 
+    def load_background_image(self, location_name):
+        """Безопасная загрузка фонового изображения"""
+        try:
+            # Получаем директорию скрипта
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+
+            # Возможные пути к папке с изображениями
+            possible_paths = [
+                os.path.join(script_dir, "utils", "picture"),
+                os.path.join(script_dir, "..", "utils", "picture"),
+                os.path.join(script_dir, "..", "..", "utils", "picture"),
+                os.path.join(script_dir, "..", "..", "..", "utils", "picture"),
+                os.path.join(os.path.dirname(script_dir), "utils", "picture"),
+                os.path.join("utils", "picture"),
+                os.path.join("picture"),
+                os.path.join("assets", "images"),
+                os.path.join("images")
+            ]
+
+            # Соответствие локаций и файлов
+            background_files = {
+                "entrance_hall": ["hall.png", "hall.jpg", "hall.jpeg"],
+                "library": ["biblio.png", "biblio.jpg", "biblio.jpeg"],
+                "room_521": ["521.png", "521.jpg", "521.jpeg"],
+                "room_605": ["605.png", "605.jpg", "605.jpeg"]
+            }
+
+            if location_name not in background_files:
+                print(f"Локация '{location_name}' не найдена в списке фонов")
+                return False
+
+            # Пробуем найти файл изображения
+            for base_path in possible_paths:
+                if not os.path.exists(base_path):
+                    continue
+
+                for filename in background_files[location_name]:
+                    image_path = os.path.join(base_path, filename)
+                    print(f"Проверяем путь: {image_path}")
+
+                    if os.path.exists(image_path):
+                        print(f"Найден файл: {image_path}")
+                        pixmap = QPixmap(image_path)
+
+                        if not pixmap.isNull():
+                            self.background_pixmap = pixmap
+                            self.current_background = location_name
+                            print(f"Фон загружен успешно: {pixmap.width()}x{pixmap.height()}")
+                            self.update()  # Перерисовать виджет
+                            return True
+                        else:
+                            print(f"Не удалось загрузить изображение: {image_path}")
+
+            print(f"Фоновое изображение для '{location_name}' не найдено")
+            return False
+
+        except Exception as e:
+            print(f"Ошибка при загрузке фона: {e}")
+            return False
+
     def set_background(self, location_name):
         """Установить фоновое изображение для локации"""
+        if location_name == self.current_background:
+            return  # Фон уже установлен
 
-        backgrounds_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "utils", "picture")
-
-        background_files = {
-            "entrance_hall": "hall.png",
-            "library": "biblio.png",
-            "room_521": "521.png",
-            "room_605": "605.png"
-        }
-
-        if location_name in background_files:
-            image_path = os.path.join(backgrounds_dir, background_files[location_name])
-
-            if os.path.exists(image_path):
-                self.background_pixmap = QPixmap(image_path)
-                if self.background_pixmap.isNull():
-                    print(f"Ошибка загрузки изображения: {image_path}")
-                self.update()  # Перерисовать виджет
-            else:
-                print(f"Фоновое изображение не найдено: {image_path}")
-
+        success = self.load_background_image(location_name)
+        if not success:
+            # Если не удалось загрузить фон, используем градиент по умолчанию
+            self.background_pixmap = None
+            self.current_background = None
+            self.update()
 
     # Обновление названия локации в заголовке
     def on_location_changed(self, location_name):
@@ -250,9 +311,13 @@ class GameScreen(QWidget):
             "library": "Библиотека",
             "room_521": "Аудитория 521",
             "room_605": "Аудитория 605",
-            "---": "— — —"  # Заголовок при взгляде в окно
+            "На часах — 6:05": "На часах — 6:05"
         }
         self.location_label.setText(location_names.get(location_name, location_name))
+
+        # Устанавливаем фоновое изображение
+        if location_name != "На часах — 6:05":
+            self.set_background(location_name)
 
     # Обновление текста истории
     def on_story_updated(self, story_data):
@@ -268,8 +333,6 @@ class GameScreen(QWidget):
             story_lines = story_data
             self.text_display.show_text(story_lines, use_typewriter=True)
 
-
-
     # Обновление кнопок выбора
     def on_choices_updated(self, choices):
         if not choices:
@@ -279,8 +342,6 @@ class GameScreen(QWidget):
             self.choice_buttons.set_choices(choices)
             self.puzzle_frame.setVisible(False)
 
-
-
     # Начало головоломки: показываем вопрос и поле ввода
     def on_puzzle_started(self, puzzle_data):
         self.current_puzzle = puzzle_data
@@ -289,7 +350,6 @@ class GameScreen(QWidget):
         self.puzzle_input.setFocus()
         self.choice_buttons.hide_choices()
         self.puzzle_frame.setVisible(True)
-
 
         if puzzle_data.get("type") == "sequence":
             self.puzzle_input.setPlaceholderText("Введите следующий элемент последовательности...")
@@ -303,7 +363,6 @@ class GameScreen(QWidget):
 
     # Отправка ответа на головоломку
     def submit_puzzle_answer(self):
-
         if self.processing_answer:
             return
         self.processing_answer = True
@@ -363,10 +422,9 @@ class GameScreen(QWidget):
         msg.exec_()
 
         if msg.clickedButton() == menu_button:
-            self.return_to_splash.emit()        # новый сигнал — на заставку
+            self.return_to_splash.emit()
         elif msg.clickedButton() == restart_button:
             self.return_to_menu.emit()
-
 
     def keyPressEvent(self, event):
         if event.key() in (Qt.Key_Return, Qt.Key_Enter):
