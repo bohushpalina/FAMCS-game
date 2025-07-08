@@ -16,6 +16,8 @@
         "ui/widgets/text_display.py",
         "utils/__init__.py",
         "utils/config.py",
+        "utils/music/credits.mp3",
+        "utils/music/title_theme.mp3",
         "ui/splash_screen.py"
     ]
 }
