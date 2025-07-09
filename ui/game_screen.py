@@ -123,19 +123,27 @@ class GameScreen(QWidget):
         puzzle_layout.addWidget(self.puzzle_label)
 
         input_layout = QHBoxLayout()
-        input_layout.setSpacing(10)
+        input_layout.setSpacing(15)
+        input_layout.addStretch(1)
 
         self.puzzle_input = QLineEdit()
-        self.puzzle_input.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE))
+        self.puzzle_input.setContextMenuPolicy(Qt.NoContextMenu)
+        self.puzzle_input.setFont(QFont(GameConfig.MAIN_FONT, 30, QFont.Bold))
         self.puzzle_input.setPlaceholderText("Введите ответ...")
+        self.puzzle_input.setMaximumWidth(400)
+        self.puzzle_input.setMinimumWidth(300)
+        self.puzzle_input.setMinimumHeight(50)  # Минимальная высота
+        self.puzzle_input.setAlignment(Qt.AlignCenter)
         input_layout.addWidget(self.puzzle_input)
 
         self.submit_button = QPushButton("Ответить")
         self.submit_button.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE))
         self.submit_button.setMaximumWidth(120)
+        self.submit_button.setMinimumHeight(50)
         self.submit_button.clicked.connect(self.submit_puzzle_answer)
         input_layout.addWidget(self.submit_button)
 
+        input_layout.addStretch(1)
         puzzle_layout.addLayout(input_layout)
 
         self.hint_label = QLabel()
@@ -174,11 +182,11 @@ class GameScreen(QWidget):
                 border-radius: 15px;
                 border: none;
             }}
-           QFrame#puzzleFrame {{
-               background-color: rgba(42, 42, 42, 150);
-               border-radius: 15px;
-               border: none;
-           }}
+            QFrame#puzzleFrame {{
+                background-color: rgba(42, 42, 42, 150);
+                border-radius: 15px;
+                border: none;
+            }}
             QLabel {{
                 color: white;
                 background-color: transparent;
@@ -205,25 +213,52 @@ class GameScreen(QWidget):
                 color: {GameConfig.BACKGROUND_COLOR};
             }}
             QLineEdit {{
-                background-color: rgba(26, 26, 26, 180);
+                background-color: rgba(26, 26, 26, 220);
                 color: white;
-                border: 2px solid transparent;
-                border-radius: 10px;
-                padding: 10px 15px;
-                font-size: 16px;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 12px;
+                padding: 15px 20px;
+                font-size: 20px;
                 font-family: 'Segoe UI', sans-serif;
-                transition: border-color 0.3s ease;
+                font-weight: bold;
+                text-align: center;
+                max-width: 400px;
+                min-height: 50px;
             }}
             QLineEdit:focus {{
                 border-color: {GameConfig.ACCENT_COLOR};
-                background-color: rgba(42, 42, 42, 200);
+                background-color: rgba(42, 42, 42, 250);
+                border-width: 3px;
             }}
             QTextEdit {{
                 background-color: transparent;
+                color: white;
             }}
+
+            /* Исправление для QMessageBox (белое меню) */
             QMessageBox {{
                 background-color: #2a2a2a;
                 color: white;
+                font-family: 'Segoe UI', sans-serif;
+            }}
+            QMessageBox QLabel {{
+                color: white;
+                background-color: transparent;
+                font-size: 14px;
+            }}
+            QMessageBox QPushButton {{
+                background-color: #444;
+                color: white;
+                min-width: 100px;
+                padding: 8px 20px;
+                font-size: 14px;
+                border-radius: 8px;
+            }}
+            QMessageBox QPushButton:hover {{
+                background-color: #555;
+            }}
+            QMessageBox QPushButton:pressed {{
+                background-color: #666;
             }}
         """)
 
@@ -242,7 +277,7 @@ class GameScreen(QWidget):
     def load_background_image(self, location_name):
         """Безопасная загрузка фонового изображения"""
         try:
-            # Получаем директорию скрипта
+
             script_dir = os.path.dirname(os.path.abspath(__file__))
 
             # Возможные пути к папке с изображениями

@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout,
                              QStackedWidget, QApplication)
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPalette, QColor
-from .splash_screen import SplashScreen  # используем относительный импорт
+from .splash_screen import SplashScreen
 from .intro_screen import IntroScreen
 from .game_screen import GameScreen
 from utils.config import GameConfig
