@@ -120,7 +120,6 @@ class SoundManager(QObject):
         if not self.is_sound_enabled:
             return
 
-        # Пробуем сначала .mp3, потом .wav
         for extension in ['.mp3', '.wav']:
             effect_path = os.path.join(self.sounds_dir, f"{effect_name}{extension}")
             if os.path.exists(effect_path):
@@ -145,21 +144,9 @@ class SoundManager(QObject):
         self.sfx_player.stop()
         self.stop_typewriter_sound()
 
-    def set_splash_volume(self, volume):
-        """Установить громкость музыки заставки (0-100)"""
-        self.splash_player.setVolume(volume)
-
-    def set_background_volume(self, volume):
-        """Установить громкость фоновой музыки (0-100)"""
-        self.background_player.setVolume(volume)
-
-    def set_credits_volume(self, volume):
-        """Установить громкость музыки титров (0-100)"""
-        self.credits_player.setVolume(volume)
 
     def set_master_volume(self, volume):
         """Установить общую громкость для всех звуков (0-100)"""
-        # Пропорционально уменьшаем громкость всех плееров
         self.splash_player.setVolume(int(volume * 0.5))      # 50% от общей
         self.background_player.setVolume(int(volume * 0.3))  # 30% от общей
         self.credits_player.setVolume(int(volume * 0.5))     # 50% от общей
@@ -175,7 +162,6 @@ class SoundManager(QObject):
 
     def resume_all(self):
         """Возобновить воспроизведение"""
-        # Возобновляем только ту музыку, которая была на паузе
         if self.splash_player.state() == QMediaPlayer.PausedState:
             self.splash_player.play()
         elif self.background_player.state() == QMediaPlayer.PausedState:

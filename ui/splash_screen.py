@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayo
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont, QPixmap, QPainter
 from utils.config import GameConfig
+from utils.sound_manager import SoundManager
 import os
 
 class SplashScreen(QWidget):
@@ -11,9 +12,17 @@ class SplashScreen(QWidget):
     def __init__(self):
         super().__init__()
         self.background_pixmap = None
+        self.sound_manager = SoundManager()
+        self.sound_manager.load_sounds()
         self.load_background_image()
         self.init_ui()
         self.setup_styling()
+
+    def showEvent(self, event):
+        """Вызывается при показе виджета"""
+        super().showEvent(event)
+        # Запускаем музыку заставки при показе экрана
+        self.sound_manager.play_splash_music()
 
     def load_background_image(self):
         """Загрузка фонового изображения"""
@@ -69,13 +78,13 @@ class SplashScreen(QWidget):
         self.start_button = QPushButton("Начать игру")
         self.start_button.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE))
         self.start_button.setMinimumSize(180, 60)
-        self.start_button.clicked.connect(self.start_game.emit)
+        self.start_button.clicked.connect(self.on_start_game)
         buttons_layout.addWidget(self.start_button)
 
         self.exit_button = QPushButton("Выйти")
         self.exit_button.setFont(QFont(GameConfig.MAIN_FONT, GameConfig.BUTTON_FONT_SIZE))
         self.exit_button.setMinimumSize(180, 60)
-        self.exit_button.clicked.connect(self.exit_game.emit)
+        self.exit_button.clicked.connect(self.on_exit_game)
         buttons_layout.addWidget(self.exit_button)
 
         buttons_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
@@ -85,6 +94,20 @@ class SplashScreen(QWidget):
         layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.setLayout(layout)
+
+    def on_start_game(self):
+        """Обработка нажатия кнопки 'Начать игру'"""
+        # Останавливаем музыку заставки
+        self.sound_manager.stop_splash_music()
+        # Испускаем сигнал начала игры
+        self.start_game.emit()
+
+    def on_exit_game(self):
+        """Обработка нажатия кнопки 'Выйти'"""
+        # Останавливаем музыку заставки
+        self.sound_manager.stop_splash_music()
+        # Испускаем сигнал выхода
+        self.exit_game.emit()
 
     def setup_styling(self):
         self.setStyleSheet(f"""

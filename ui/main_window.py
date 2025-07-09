@@ -46,9 +46,8 @@ class MainWindow(QMainWindow):
             self.game_screen.return_to_menu.connect(self.return_to_menu)       # Перезапуск — на интро
             self.game_screen.return_to_splash.connect(self.go_to_splash)       # Главное меню — на заставку
 
-
-                # Показываем сначала заставку
             self.stacked_widget.setCurrentWidget(self.splash_screen)
+            self.disable_all_context_menus(self)
 
     def setup_styling(self):
         """Настройка стилей"""
@@ -58,6 +57,13 @@ class MainWindow(QMainWindow):
                 color: {GameConfig.TEXT_COLOR};
             }}
         """)
+
+    def disable_all_context_menus(self, widget):
+        """Рекурсивно отключает контекстные меню для всех виджетов"""
+        widget.setContextMenuPolicy(Qt.NoContextMenu)
+
+        for child in widget.findChildren(QWidget):
+            child.setContextMenuPolicy(Qt.NoContextMenu)
 
     def start_game(self):
         """Начать игру"""
@@ -76,7 +82,6 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         """Обработка закрытия окна"""
-        # Здесь можно добавить сохранение игры
         event.accept()
 
     def keyPressEvent(self, event):
