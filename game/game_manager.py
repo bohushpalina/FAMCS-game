@@ -73,7 +73,10 @@ class GameManager(QObject):
 
         elif location_name == "room_605":
             self.story_updated.emit(StoryText.ROOM_605_DESCRIPTION)
-            self.choices_updated.emit([StoryText.ROOM_605_FIRST_ACTION])
+            self.choices_updated.emit({
+                    "items": [StoryText.ROOM_605_FIRST_ACTION],
+                    "numbered": False
+                })
 
 
 
