@@ -68,7 +68,6 @@ class GameManager(QObject):
 
         elif location_name == "room_521":
             self.story_updated.emit(StoryText.ROOM_521_DESCRIPTION)
-            # Запускаем головоломку с числовой последовательностью
             self.start_pi_puzzle()
 
         elif location_name == "room_605":
@@ -77,8 +76,6 @@ class GameManager(QObject):
                     "items": [StoryText.ROOM_605_FIRST_ACTION],
                     "numbered": False
                 })
-
-
 
 
 
@@ -209,8 +206,7 @@ class GameManager(QObject):
             # Кнопка 4 — Завершить
             elif choice == StoryText.ROOM_605_FINAL_ACTION:
                 self.choices_updated.emit([])
-                self.sound_manager.play_credits_music()  # Запускаем музыку для титров
-                # Передаем флаг is_credits=True в третьем параметре
+                self.sound_manager.play_credits_music()
                 self.story_updated.emit((StoryText.CREDITS, False, True))
                 self.game_over = True
                 self.game_ended.emit(True)
@@ -220,9 +216,6 @@ class GameManager(QObject):
         self.room_605_new_action_shown = False
         self.room_605_wake_up_ready = False
         self.room_605_final_action_shown = False
-
-
-
 
 
     def start_math_puzzle(self):
@@ -252,9 +245,7 @@ class GameManager(QObject):
                 self.game_state.add_item("room_521_key")
                 self.sound_manager.play_sound_effect("key_splash")
                 self.story_updated.emit(StoryText.LIBRARY_KEY_FOUND + ["Куда отправиться?"])
-                # Показываем варианты выбора аудиторий
                 self.choices_updated.emit(StoryText.AFTER_LIBRARY_CHOICES)
-                # Меняем локацию, чтобы обработка выбора после библиотеки была корректной
                 self.current_location = "library_after_puzzle"
                 return True
 

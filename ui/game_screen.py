@@ -133,7 +133,7 @@ class GameScreen(QWidget):
         self.puzzle_input.setPlaceholderText("Введите ответ...")
         self.puzzle_input.setMaximumWidth(350)
         self.puzzle_input.setMinimumWidth(300)
-        self.puzzle_input.setMinimumHeight(50)  # Минимальная высота
+        self.puzzle_input.setMinimumHeight(50)
         self.puzzle_input.setAlignment(Qt.AlignCenter)
         input_layout.addWidget(self.puzzle_input)
 

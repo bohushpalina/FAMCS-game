@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QTextEdit
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
-from PyQt5.QtGui import QFont, QTextCursor, QTextBlockFormat, QTextCharFormat
+from PyQt5.QtGui import QFont, QTextCursor, QTextBlockFormat, QTextCharFormat, QColor
 from utils.config import GameConfig
 
 
