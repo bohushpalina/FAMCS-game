@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
         self.setup_styling()
 
     def init_ui(self):
-            self.setWindowTitle("University Quest")
+            self.setWindowTitle("Увидимся в 6:05")
             self.setGeometry(100, 100, GameConfig.WINDOW_WIDTH, GameConfig.WINDOW_HEIGHT)
             self.setMinimumSize(GameConfig.MIN_WINDOW_WIDTH, GameConfig.MIN_WINDOW_HEIGHT)
             central_widget = QWidget()
