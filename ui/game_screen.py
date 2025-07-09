@@ -18,6 +18,7 @@ class GameScreen(QWidget):
     def __init__(self, game_manager):
         super().__init__()
         self.game_manager = game_manager
+        self.game_manager.set_game_screen(self)
         self.current_puzzle = None
         self.current_background = None
         self.background_pixmap = None

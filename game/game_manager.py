@@ -99,8 +99,7 @@ class GameManager(QObject):
                     self.change_location("library")
                 else:
                     self.story_updated.emit([response])
-                    # Через 3 секунды возвращаем начальный текст и выборы
-
+                    self.game_screen.show_message("Неправильно. Попробуйте ещё раз!")
                     def reset_entrance_hall():
                         self.story_updated.emit((StoryText.ENTRANCE_HALL_DESCRIPTION, True))
                         self.choices_updated.emit(StoryText.ENTRANCE_HALL_CHOICES)
@@ -116,6 +115,7 @@ class GameManager(QObject):
                     self.game_state.add_item("library_key")
                     self.start_math_puzzle()
                 else:
+                    self.game_screen.show_message("Неправильно. Попробуйте ещё раз!")
                     self.story_updated.emit([response])
                     self.choices_updated.emit(StoryText.LIBRARY_BOOKS)
 
@@ -133,6 +133,8 @@ class GameManager(QObject):
                 else:
                     # Показываем реакцию на неправильный выбор
                     self.story_updated.emit([StoryText.AFTER_LIBRARY_RESPONSES[choice]])
+                    self.game_screen.show_message("Неправильно. Попробуйте ещё раз!")
+
 
                     # Через 7 секунд возвращаем выбор и исходный текст
                     def reset_after_library():
@@ -150,6 +152,7 @@ class GameManager(QObject):
             if choice == "Аудитория 605":
                 self.change_location("room_605")
             else:
+                self.game_screen.show_message("Неправильно. Попробуйте ещё раз!")
 
                 def reset_room_521():
                     self.story_updated.emit((StoryText.ROOM_521_CLUE, True))
@@ -261,6 +264,10 @@ class GameManager(QObject):
                 self.story_updated.emit(StoryText.ROOM_521_CLUE)
                 self.choices_updated.emit(StoryText.ROOM_521_CHOICES)  # Показать выборы
                 return True
+
+    def set_game_screen(self, screen):
+        self.game_screen = screen
+
 
 
     def start_final_scene(self):
