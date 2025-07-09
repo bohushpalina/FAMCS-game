@@ -128,9 +128,10 @@ class GameScreen(QWidget):
 
         self.puzzle_input = QLineEdit()
         self.puzzle_input.setContextMenuPolicy(Qt.NoContextMenu)
-        self.puzzle_input.setFont(QFont(GameConfig.MAIN_FONT, 30, QFont.Bold))
+        self.puzzle_input.setStyleSheet("color: white; weight: bold; font-size: 40px;")
+
         self.puzzle_input.setPlaceholderText("Введите ответ...")
-        self.puzzle_input.setMaximumWidth(400)
+        self.puzzle_input.setMaximumWidth(350)
         self.puzzle_input.setMinimumWidth(300)
         self.puzzle_input.setMinimumHeight(50)  # Минимальная высота
         self.puzzle_input.setAlignment(Qt.AlignCenter)

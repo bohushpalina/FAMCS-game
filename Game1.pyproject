@@ -6,7 +6,6 @@
         "data/story_text.py",
         "game/__init__.py",
         "game/game_manager.py",
-        "game/game_state.py",
         "ui/__init__.py",
         "ui/game_screen.py",
         "ui/intro_screen.py",
