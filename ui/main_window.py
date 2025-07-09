@@ -66,11 +66,13 @@ class MainWindow(QMainWindow):
         self.game_screen.start_new_game()
 
     def go_to_splash(self):
+        self.game_manager.sound_manager.stop_all()
         self.stacked_widget.setCurrentWidget(self.splash_screen)
 
 
     def return_to_menu(self):
         """Вернуться в меню"""
+        self.game_manager.sound_manager.stop_all()
         self.stacked_widget.setCurrentWidget(self.intro_screen)
 
     def closeEvent(self, event):

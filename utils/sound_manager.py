@@ -85,6 +85,14 @@ class SoundManager(QObject):
         self.typewriter_player.stop()
         self.credits_player.stop()
 
+
+    def stop_all(self):
+        """Остановить всю музыку и звуки"""
+        self.background_player.stop()
+        self.credits_player.stop()
+        self.sfx_player.stop()
+        self.typewriter_player.stop()
+
     def set_background_volume(self, volume):
         """Установить громкость фоновой музыки (0-100)"""
         self.background_player.setVolume(volume)
