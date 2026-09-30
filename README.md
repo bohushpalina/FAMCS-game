@@ -1,3 +1,2 @@
 # FAMCS-game
-Разработано: **Анастасией** и **Полиной**
-
+Only start documentation
