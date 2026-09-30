@@ -1,5 +1,3 @@
-# FAMCS-game
-I just wanna have 0 bugs ☠️☠️
 # See You at 6:05 (Увидимся в 6:05)
 
 An interactive narrative text quest and puzzle desktop game inspired by university life at FAMCS BSU.
