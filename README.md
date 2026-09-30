@@ -4,6 +4,14 @@ An interactive narrative text quest and puzzle desktop game inspired by universi
 
 ---
 
+## Repository Structure & Branches
+
+* `product` (**Main Branch**): Active production branch containing the full game source code, UI components, audio engine, and latest features.
+* `main`: Archival branch containing legacy project documentation.
+* `project`: Legacy development branch (deprecated).
+
+---
+
 ## About the Game
 
 **"See You at 6:05"** is a story-driven quest game built with Python and PyQt5. The player navigates through iconic university locations (Entrance Hall, Library, Lecture Halls), solves mathematical and logic puzzles, and unfolds a mysterious storyline set within the faculty wall.
