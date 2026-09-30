@@ -4,6 +4,16 @@ An interactive narrative text quest and puzzle desktop game inspired by universi
 
 ---
 
+## 🎮 Quick Start / Executable Release
+
+You can play the game without installing Python or dependencies!
+
+1. Download or clone this repository (`product` branch).
+2. Navigate to the `dist/` directory.
+3. Run `main.exe` (or `main/main.exe`) to start the game immediately.
+
+---
+
 ## Repository Structure & Branches
 
 * `product` (**Main Branch**): Active production branch containing the full game source code, UI components, audio engine, and latest features.
